@@ -1,4 +1,4 @@
 Genetics
 ========
 
-Small tools for genetics reserach
+Small tools for genetics research
