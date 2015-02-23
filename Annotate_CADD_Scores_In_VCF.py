@@ -76,7 +76,9 @@ def listener(q):
 	'''listens for messages on the q, writes to file. '''
 	sys.stdout.write('Starting listener\n')
 	
-	f = open(options.out_file, 'wb') 
+	f = open(options.out_file, 'wb')
+	f.write("##INFO=<ID=PHRED_CADD,Number=1,Type=Integer,Description=\"PHRED scaled CADD score\">")
+	f.write("##INFO=<ID=RAW_CADD,Number=1,Type=Integer,Description=\"Raw CADD score\">") 
 	f.write('#' + '\t'.join(VCF_WRITER.template._column_headers + VCF_WRITER.template.samples) + '\n')
 	f.flush()
 	
