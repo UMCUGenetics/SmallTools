@@ -56,14 +56,14 @@ def extract_CADD_score(arguments, q):
 	tb = tabix.open(caddfile)
 	records = tb.query((vcf_record.CHROM).replace("chr",""), vcf_record.POS-1, vcf_record.POS)
 
-	vcf_record.INFO["RAW_CADD"]   = 0
-	vcf_record.INFO["PHRED_CADD"] = 0
+	vcf_record.INFO["RAWCADD"]   = 0
+	vcf_record.INFO["PHREDCADD"] = 0
 
 
 	for rec in records:
 		if rec[3] == vcf_record.ALT[0]:
-			vcf_record.INFO["RAW_CADD"]   = rec[4]
-			vcf_record.INFO["PHRED_CADD"] = rec[5]
+			vcf_record.INFO["RAWCADD"]   = rec[4]
+			vcf_record.INFO["PHREDCADD"] = rec[5]
 			break
 	
 	annotated = VCF_WRITER._map(str, [vcf_record.CHROM, vcf_record.POS, vcf_record.ID, vcf_record.REF]) + [VCF_WRITER._format_alt(vcf_record.ALT), str(vcf_record.QUAL) or '.', VCF_WRITER._format_filter(vcf_record.FILTER), VCF_WRITER._format_info(vcf_record.INFO)]
@@ -77,22 +77,23 @@ def listener(q):
 	sys.stdout.write('Starting listener\n')
 	
 	f = open(options.out_file, 'wb')
-	f.write("##INFO=<ID=PHRED_CADD,Number=1,Type=Integer,Description=\"PHRED scaled CADD score\">")
-	f.write("##INFO=<ID=RAW_CADD,Number=1,Type=Integer,Description=\"Raw CADD score\">") 
+	f.write("##INFO=<ID=PHREDCADD,Number=1,Type=Float,Description=\"PHRED scaled CADD score\">")
+	f.write("##INFO=<ID=RAWCADD,Number=1,Type=Float,Description=\"Raw CADD score\">") 
 	f.write('#' + '\t'.join(VCF_WRITER.template._column_headers + VCF_WRITER.template.samples) + '\n')
 	f.flush()
 	
 	while 1:
 		m = q.get()
-		#sys.stdout.write("----\n")
-		#sys.stdout.write(str(m)+'\n')
 		if m == 'kill':
 			if not q.empty():
+				# received kill signal without finishing all the processes
 				sys.stdout.write('ERROR\n')
 				break
+			# received kill signal, finished all the processes, done
 			sys.stdout.write('DONE\n')
 			break
 		
+		# A vcf record was found, write to file
 		f.write('\t'.join(m)+'\n')
 		f.flush()
 	f.close()
