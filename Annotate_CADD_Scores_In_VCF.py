@@ -23,12 +23,13 @@ parser.add_option("--t",     dest="nr_cpus", 	 help="Number of CPUs to use",	   
 parser.add_option("--out",	 dest="out_file",	 help="Path to output VCF file",	default="out.vcf")
 (options, args) = parser.parse_args()
 
-def check_files(options):
-	print("Checking files")
+def check_arguments(options):
+	#print("Checking arguments")
 	if not os.path.exists(options.vcf_file):
 		print("Invalid VCF file %s"%(options.vcf_file))
 		return False
-
+	
+	# ---- SNV file ---
 	if not os.path.exists(options.cadd_snvs):
 		print("Invalid CADD SNV file %s"%(options.cadd_snvs))
 		return False
@@ -36,14 +37,21 @@ def check_files(options):
 		print("No Index for CADD SNV file %s"%(options.cadd_snvs+".tbi"))
 		return False
 
+	# ---- InDel file ---
 	if not os.path.exists(options.cadd_indels):
 		print("Invalid CADD InDel file %s"%(options.cadd_indels))
 		return False
 	if not os.path.exists(options.cadd_indels+".tbi"):
-		print("No Index for CADD SNV file %s"%(options.cadd_indels+".tbi"))
+		print("No Index for CADD InDel file %s"%(options.cadd_indels+".tbi"))
 		return False
 
-	#print("Ready to go")
+	# ---- Other settings ----
+	try int(options.nr_cpus):
+		pass
+	except Exception, e:
+		print("Invalid nr of cpus defined %s"%(options.nr_cpus))
+		return False
+
 	return True
 
 VCF_READER = vcf.Reader(open(options.vcf_file, 'r'))
@@ -54,29 +62,37 @@ def extract_CADD_score(arguments, q):
 	vcf_record, caddfile = arguments
 	
 	tb = tabix.open(caddfile)
+	# Specific for CADD files
+	# FIXME: get info about chr or not from provided VCF file
 	records = tb.query((vcf_record.CHROM).replace("chr",""), vcf_record.POS-1, vcf_record.POS)
 
 	vcf_record.INFO["RAWCADD"]   = 0
 	vcf_record.INFO["PHREDCADD"] = 0
 
-
+	# Look for matching mutation
+	# Works for SNVs, InDels optimisation is ongoing
 	for rec in records:
 		if rec[3] == vcf_record.ALT[0]:
+			# FIXME: Make requested fields optional through arguments
 			vcf_record.INFO["RAWCADD"]   = rec[4]
 			vcf_record.INFO["PHREDCADD"] = rec[5]
 			break
 	
+	# workaround since multiprocess can't handle VCF record class objects
+	# FIXME: use VCF class records rather than this ugly string
 	annotated = VCF_WRITER._map(str, [vcf_record.CHROM, vcf_record.POS, vcf_record.ID, vcf_record.REF]) + [VCF_WRITER._format_alt(vcf_record.ALT), str(vcf_record.QUAL) or '.', VCF_WRITER._format_filter(vcf_record.FILTER), VCF_WRITER._format_info(vcf_record.INFO)]
 
+	# Return results to Queue
 	q.put(annotated)
 	return(annotated)
 
 
 def listener(q):
 	'''listens for messages on the q, writes to file. '''
-	sys.stdout.write('Starting listener\n')
+	#sys.stdout.write('Starting listener\n')
 	
 	f = open(options.out_file, 'wb')
+	#FIXME: get the rest of the header
 	f.write("##INFO=<ID=PHREDCADD,Number=1,Type=Float,Description=\"PHRED scaled CADD score\">")
 	f.write("##INFO=<ID=RAWCADD,Number=1,Type=Float,Description=\"Raw CADD score\">") 
 	f.write('#' + '\t'.join(VCF_WRITER.template._column_headers + VCF_WRITER.template.samples) + '\n')
@@ -100,21 +116,22 @@ def listener(q):
 
 
 def main():
-	if not check_files(options):
-		print("Error")
+	if not check_arguments(options):
+		print("Error in provided arguments")
 		exit(0)
 
 	currtime = time()
 
-	#must use Manager queue here, or will not work
+	#Init Manager queue
 	manager = mp.Manager()
-	q = manager.Queue()		
+	q = manager.Queue()
+	# Init worker pool
 	pool = mp.Pool(int(options.nr_cpus))
 
-	#put listener to work first
+	#Init Listener
 	watcher = pool.apply_async(listener, (q,))
 
-	print("Filling Queue")
+	#print("Filling Queue")
 	#fire off workers
 	jobs = []
 	for vcf_record in VCF_READER:
@@ -129,12 +146,12 @@ def main():
 		
 
 
-	print("Collecting results")
+	#print("Collecting results")
 	# collect results from the workers through the pool result queue
 	for job in jobs:
 		job.get()
 	
-	#now we are done, kill the listener
+	# now we are done, kill the listener
 	q.put('kill')
 	
 	pool.close()
