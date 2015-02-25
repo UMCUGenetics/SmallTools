@@ -23,6 +23,7 @@ parser.add_option("--t",     dest="nr_cpus", 	 help="Number of CPUs to use",	   
 parser.add_option("--out",	 dest="out_file",	 help="Path to output VCF file",	default="out.vcf")
 (options, args) = parser.parse_args()
 
+
 def check_arguments(options):
 	#print("Checking arguments")
 	if not os.path.exists(options.vcf_file):
@@ -58,16 +59,20 @@ VCF_READER = vcf.Reader(open(options.vcf_file, 'r'))
 VCF_WRITER = vcf.Writer(open(options.out_file, 'w'), VCF_READER)
 VCF_WRITER.close()
 
+VALID_CHROMOSOMES = {"1":True,"2":True,"3":True,"4":True,"5":True,"6":True,"7":True,"8":True,"9":True,"10":True,"11":True,"12":True,"13":True,"14":True,"15":True,"16":True,"17":True,"18":True,"19":True,"20":True,"21":True,"22":True,"X":True,,"Y":True}
+
 def extract_CADD_score(arguments, q):
 	vcf_record, caddfile = arguments
 	
 	tb = tabix.open(caddfile)
-	# Specific for CADD files
-	# FIXME: get info about chr or not from provided VCF file
-	records = tb.query((vcf_record.CHROM).replace("chr",""), vcf_record.POS-1, vcf_record.POS)
 
+	chromosome = (vcf_record.CHROM).replace("chr","")
 	vcf_record.INFO["RAWCADD"]   = 0
 	vcf_record.INFO["PHREDCADD"] = 0
+
+	# Specific for CADD files
+	# FIXME: get info about chr or not from provided VCF file
+	records = tb.query(chromosome, vcf_record.POS-1, vcf_record.POS)
 
 	# Look for matching mutation
 	# Works for SNVs, InDels optimisation is ongoing
@@ -135,6 +140,10 @@ def main():
 	#fire off workers
 	jobs = []
 	for vcf_record in VCF_READER:
+		chromosome = (vcf_record.CHROM).replace("chr","")
+		if chromosome not in VALID_CHROMOSOMES:
+			continue
+			
 		arguments = []
 		if vcf_record.is_indel:
 			arguments = [vcf_record, options.cadd_indels]
