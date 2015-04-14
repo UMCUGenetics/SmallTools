@@ -16,11 +16,11 @@ CADD FORMAT
 1 10001 T C 0.114925	5.063
 """
 parser = OptionParser()
-parser.add_option("--vcf",	 dest="vcf_file",	 help="Path to VCF to annotate",	default=False)
-parser.add_option("--snv",	 dest="cadd_snvs",	 help="Path to prescored SNVs",		default=False)
-parser.add_option("--indel", dest="cadd_indels", help="Path to prescored InDels",	default=False)
+parser.add_option("--vcf",   dest="vcf_file",	 help="Path to VCF to annotate",    default=False)
+parser.add_option("--snv",   dest="cadd_snvs",	 help="Path to prescored SNVs",	    default=False)
+parser.add_option("--indel", dest="cadd_indels", help="Path to prescored InDels",   default=False)
 parser.add_option("--t",     dest="nr_cpus", 	 help="Number of CPUs to use",	    default=8)
-parser.add_option("--out",	 dest="out_file",	 help="Path to output VCF file",	default="out.vcf")
+parser.add_option("--out",   dest="out_file",	 help="Path to output VCF file",    default="out.vcf")
 (options, args) = parser.parse_args()
 
 
