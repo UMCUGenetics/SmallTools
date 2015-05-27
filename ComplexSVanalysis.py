@@ -66,6 +66,8 @@ def gather_alt_mappings(options, collection):
 		for line in dropwhile(isHeaderLine, f):
 			if isHeaderLine(line):
 				continue
+			if len(line) <= 5:
+				continue
 
 			lines_gen = islice(f, 4)
 
@@ -74,8 +76,6 @@ def gather_alt_mappings(options, collection):
 			c = next(lines_gen).strip()
 			d = next(lines_gen)
 
-			if (len(a) <= 5):
-				print(a)
 			score = int(a.split("=")[1])
 			ref =  b.split()
 			read = c.split()
