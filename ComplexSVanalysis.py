@@ -45,7 +45,7 @@ def gather_sv_data(options):
 	for reg in regions:
 		for read in bamfile.fetch(reg.chrom, reg.start, reg.end):
 			#print read
-			if read.endswith("2d")
+			if read.endswith("2d"):
 				collection.append(read.query_name)
 				#print read.reference_id, read.reference_start, read.reference_end
 				#print read.query_name, read.query_alignment_start, read.query_alignment_end
@@ -62,15 +62,14 @@ def isHeaderLine(line):
 def gather_alt_mappings(options, collection):
 	# Parse LAST file
 	with open(options.last_file,'r') as f:
-    	for line in dropwhile(isBadLine, f):
-    		lines_gen = islice(f, 4)
+		for line in dropwhile(isBadLine, f):
+			lines_gen = islice(f, 4)
 
-    		score = int(lines_gen[0].strip().split("=")[1])
-    		ref =  lines_gen[1].strip().split()
-    		read = lines_gen[2].strip().split()
+			score = int(lines_gen[0].strip().split("=")[1])
+			ref =  lines_gen[1].strip().split()
+			read = lines_gen[2].strip().split()
 
-    		print read[0],score
-
+			print read[0], score
 
 
 
