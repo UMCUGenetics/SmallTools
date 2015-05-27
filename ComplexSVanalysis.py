@@ -11,6 +11,7 @@ parser = OptionParser()
 parser.add_option("--bam",   dest="bam_file",	 help="Path of BAM file to parse",			default=False)
 parser.add_option("--last",  dest="last_file",	 help="Path of LAST file to parse",			default=False)
 parser.add_option("--reg",   dest="region_file", help="Regions of interest BED file",		default=False)
+parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=250)
 parser.add_option("--nral",  dest="nr_align",	 help="Number of alignments to display",	default=10)
 (options, args) = parser.parse_args()
 
@@ -57,19 +58,29 @@ def gather_sv_data(options):
 from itertools import *
 
 def isHeaderLine(line):
-    return line.startswith("#")
+	return line.startswith("#")
 
 def gather_alt_mappings(options, collection):
 	# Parse LAST file
 	with open(options.last_file,'r') as f:
 		for line in dropwhile(isHeaderLine, f):
+			if isHeaderLine(line):
+				continue
+
 			lines_gen = islice(f, 4)
 
-			score = int(next(lines_gen).strip().split("=")[1])
-			ref =  next(lines_gen).strip().split()
-			read = next(lines_gen).strip().split()
+			a = line.strip()
+			b = next(lines_gen).strip()
+			c = next(lines_gen).strip()
+			d = next(lines_gen)
 
-			print read[0], score
+			score = int(a.split("=")[1])
+			ref =  b.split()
+			read = c.split()
+
+			if (read[1] in collection and score >= options.qual_score):
+				print read[1], score, ref[1], ref[2]
+
 
 
 
