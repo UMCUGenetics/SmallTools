@@ -62,7 +62,7 @@ def isHeaderLine(line):
 def gather_alt_mappings(options, collection):
 	# Parse LAST file
 	with open(options.last_file,'r') as f:
-		for line in dropwhile(isBadLine, f):
+		for line in dropwhile(isHeaderLine, f):
 			lines_gen = islice(f, 4)
 
 			score = int(lines_gen[0].strip().split("=")[1])
