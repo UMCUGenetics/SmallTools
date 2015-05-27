@@ -45,7 +45,7 @@ def gather_sv_data(options):
 	for reg in regions:
 		for read in bamfile.fetch(reg.chrom, reg.start, reg.end):
 			#print read
-			if read.endswith("2d"):
+			if read.query_name.endswith("2d"):
 				collection.append(read.query_name)
 				#print read.reference_id, read.reference_start, read.reference_end
 				#print read.query_name, read.query_alignment_start, read.query_alignment_end
