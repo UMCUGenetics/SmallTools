@@ -75,7 +75,7 @@ def gather_alt_mappings(options, collection):
 			d = next(lines_gen)
 
 			if (len(a) <= 5):
-				print(score)
+				print(a)
 			score = int(a.split("=")[1])
 			ref =  b.split()
 			read = c.split()
