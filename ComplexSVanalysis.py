@@ -40,7 +40,7 @@ class LASTregion:
 			return 23
 		elif self.loc == 'Y':
 			return 24
-		else
+		else:
 			return int(self.loc)
 
 class LASTmapping:
