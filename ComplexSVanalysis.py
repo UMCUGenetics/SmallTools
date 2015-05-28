@@ -24,7 +24,7 @@ class LASTregion:
 		self.pos = int(array[2])
 		self.len = int(array[3])
 		self.strand = array[4]
-		#self.totlen = int(array[5])
+		self.totlen = int(array[5])
 		self.seq = array[6]
 
 class LASTmapping:
@@ -39,7 +39,7 @@ class LASTmapping:
 		return self.score < other.score
 
 	def __len__(self):
-		return self.ref.len
+		return self.aln.totlen
 
 # ------------------------------------------------------------------------------------------------------------------------
 
@@ -106,27 +106,49 @@ def gather_alt_mappings(options, collection):
 			lines_gen = islice(f, 4)
 
 			score = int(line.strip().split("=")[1])
-			ref =  next(lines_gen).strip().split()
-			read = next(lines_gen).strip().split()
+			ref = next(lines_gen).strip().split()
+			aln = next(lines_gen).strip().split()
 			empty = next(lines_gen)
 
 			strand = 1
-			if read[4] == '-':
+			if aln[4] == '-':
 				strand = -1
 
-			if (read[1] in collection and score >= options.qual_score):
-				collection[read[1]].append(LASTmapping(score, ref, read))
+			if (aln[1] in collection and score >= options.qual_score):
+				collection[aln[1]].append(LASTmapping(score, ref, aln))
 
-				#print "%i %s:%s-%s  -> %s:%s-%s" %(score, read[1], read[2], read[3], ref[1], ref[2], ref[3])
+				#print "%i %s:%s-%s  -> %s:%s-%s" %(score, aln[1], aln[2], aln[3], ref[1], ref[2], ref[3])
 
 
 def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
 	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
+	print color_list
 
 	for read in collection:
 		print read, collection[read]
-		
+
+		fig, ax = plt.subplots()
+				
+		alignments = collection[read].sort()
+		ax.set_xlim(0,len(alignments[0]))
+		ax.set_ylim(options.qual_score,10000)
+
+		bars = []
+		cols = []
+
+		for i in range(0, options.nr_align):
+			bars.append(list(alignments[i].aln.pos,alignments[i].aln.len))
+			cols.append(color_list[alignments.ref.loc])
+					
+		ax.broken_barh(bars, (0, alignments[i].score), facecolors=cols)
+
+		axself.set_yticks(range(options.qual_score,10000,250))
+		ax.grid(True)
+		ax.set_xlabel('Loaction within read')
+		ax.set_ylabel('Quality score')
+
+		plt.show()	
 
 # ------------------------------------------------------------------------------------------------------------------------
 
