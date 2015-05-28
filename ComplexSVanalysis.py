@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from matplotlib.collections import PatchCollection
 
 from optparse import OptionParser
 
@@ -166,7 +167,7 @@ def plot_alt_mappings(options, collection):
 		#print read, collection[read]
 
 		fig = plt.figure()
-		ax = fig.add_subplot()
+		ax = fig.add_subplot(111)
 
 		#alignments = collection[read].sort()
 		alignments = collection[read]
@@ -181,20 +182,20 @@ def plot_alt_mappings(options, collection):
 		ax.set_ylim(-10, 10)
 
 		patches = []
-		colors = []
+		#colors = []
 		for i in range(0, options.nr_align):
 			
 			score = log(sortaln[i].score)
-			angle = 0
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
-				angle = 180
 
-			patches.append( mpatches.Arrow(sortaln[i].aln.pos, score-0.1, sortaln[i].aln.length, 0.2, width=0.1, label=str(sortaln[i].ref.get_loc()), angle=angle) )
+			col = color_list[sortaln[i].ref.get_loc()]
+			patches.append( mpatches.Arrow(sortaln[i].aln.pos, score, sortaln[i].aln.length, 0.0, width=1.0, label=str(sortaln[i].ref.get_loc()), color=col) )
+			#colors.append(col)
 
 		# Add all reads
 		collection = PatchCollection(patches, cmap=plt.cm.hsv, alpha=0.6)
-		collection.set_array(np.array(colors))
+		#collection.set_array(np.array(colors))
 		ax.add_collection(collection)
 
 		# Mark-up of plot
