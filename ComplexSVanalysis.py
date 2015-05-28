@@ -123,10 +123,10 @@ def gather_alt_mappings(options, collection):
 def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
 	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
-	print color_list
+	#print color_list
 
 	for read in collection:
-		print read, collection[read]
+		#print read, collection[read]
 
 		fig, ax = plt.subplots()
 				
@@ -148,7 +148,8 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Quality score')
 
-		plt.show()	
+		plt.show()
+		fig.savefig('test.pdf')
 
 # ------------------------------------------------------------------------------------------------------------------------
 
