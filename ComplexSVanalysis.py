@@ -166,7 +166,7 @@ def plot_alt_mappings(options, collection):
 		#print read, collection[read]
 
 		fig = plt.figure()
-		ax = fig.add_subplot(111)
+		ax = fig.add_subplot()
 
 		#alignments = collection[read].sort()
 		alignments = collection[read]
@@ -180,13 +180,22 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlim(0, sortaln[0].aln.totlen)
 		ax.set_ylim(-10, 10)
 
+		patches = []
+		colors = []
 		for i in range(0, options.nr_align):
 			
 			score = log(sortaln[i].score)
+			angle = 0
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
+				angle = 180
 
-			ax.broken_barh([(sortaln[i].aln.pos, sortaln[i].aln.length)], (score-0.1, score+0.1), facecolors=color_list[sortaln[i].ref.get_loc()])
+			patches.append( mpatches.Arrow(sortaln[i].aln.pos, score-0.1, sortaln[i].aln.length, 0.2, width=0.1, label=str(sortaln[i].ref.get_loc()), angle=angle) )
+
+		# Add all reads
+		collection = PatchCollection(patches, cmap=plt.cm.hsv, alpha=0.6)
+		collection.set_array(np.array(colors))
+		ax.add_collection(collection)
 
 		# Mark-up of plot
 		ax.set_yticks(range(-10, 10, 1))
