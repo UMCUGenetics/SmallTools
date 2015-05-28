@@ -29,11 +29,11 @@ class LASTregion:
 		self.totlen = int(array[5])
 		self.seq = array[6]
 
-		def __repr__(self):
-			return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
+	def __repr__(self):
+		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
 
-		def __str__(self):
-			return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
+	def __str__(self):
+		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
 
 class LASTmapping:
 	"""LAST mapping class"""
@@ -42,6 +42,9 @@ class LASTmapping:
 		self.score = score
 		self.ref = LASTregion(ref)
 		self.aln = LASTregion(aln)
+
+	def __eq__(self, other):
+		return self.score == other.score
 
 	def __lt__(self, other):
 		return self.score < other.score
@@ -146,7 +149,8 @@ def plot_alt_mappings(options, collection):
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
 
-		alignments = collection[read].sort()
+		#alignments = collection[read].sort()
+		alignments = collection[read]
 		ax.set_xlim(0,alignments[0].aln.totlen)
 		ax.set_ylim(options.qual_score,10000)
 
@@ -154,7 +158,7 @@ def plot_alt_mappings(options, collection):
 		cols = []
 
 		for i in range(0, options.nr_align):
-			bars.append(list(alignments[i].aln.pos,alignments[i].aln.len))
+			bars.append(list(alignments[i].aln.pos,alignments[i].aln.totlen))
 			cols.append(color_list[alignments.ref.loc])
 					
 		ax.broken_barh(bars, (0, alignments[i].score), facecolors=cols)
