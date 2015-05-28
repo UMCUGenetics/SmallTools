@@ -184,7 +184,7 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Quality score')
 
-		ax.legend(colors, chroms, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+		ax.legend(color_list, chroms, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
 		#plt.show()
 		fig.savefig('test.pdf')
