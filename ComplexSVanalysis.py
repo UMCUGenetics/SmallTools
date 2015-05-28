@@ -159,10 +159,12 @@ def plot_alt_mappings(options, collection):
 
 		#alignments = collection[read].sort()
 		alignments = collection[read]
+		sortaln = sorted(alignments)
+		print(sortaln)
 
 		if len(alignments) == 0:
 			continue
-			
+
 		ax.set_xlim(0,alignments[0].aln.totlen)
 		ax.set_ylim(options.qual_score,10000)
 
@@ -170,11 +172,11 @@ def plot_alt_mappings(options, collection):
 		cols = []
 
 		for i in range(0, options.nr_align):
-			tup = (alignments[i].aln.pos,alignments[i].aln.totlen)
+			tup = (sortaln[i].aln.pos, sortaln[i].aln.totlen)
 			bars.append(tup)
-			cols.append(color_list[alignments[i].ref.get_loc()])
+			cols.append(color_list[sortaln[i].ref.get_loc()])
 					
-		ax.broken_barh(bars, (0, alignments[i].score), facecolors=cols)
+		ax.broken_barh(bars, (0, sortaln[i].score), facecolors=cols)
 
 		ax.set_yticks(range(options.qual_score,10000,250))
 		ax.grid(True)
