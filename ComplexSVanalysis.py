@@ -186,7 +186,7 @@ def plot_alt_mappings(options, collection):
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
 
-			ax.broken_barh((sortaln[i].aln.pos, sortaln[i].aln.length), (score-0.1, score+0.1), facecolors=color_list[sortaln[i].ref.get_loc()])
+			ax.broken_barh([(sortaln[i].aln.pos, sortaln[i].aln.length)], (score-0.1, score+0.1), facecolors=color_list[sortaln[i].ref.get_loc()])
 
 		# Mark-up of plot
 		ax.set_yticks(range(-10, 10, 1))
