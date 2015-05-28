@@ -1,33 +1,57 @@
 #!/opt/local/bin/python2.7
-import sys
+
+# GENERAL
 import os
-#import multiprocessing
-from itertools import *
+from itertools import dropwhile, islice
 
 # BAM and BED handling
-from pysam import AlignmentFile
+from pysam import AlignmentFile, AlignedSegment
 from pybedtools import BedTool
 
-# BIO
-from Bio.Seq import Seq
-from Bio.SeqRecord import SeqRecord
-from Bio.SeqFeature import SeqFeature, FeatureLocation
-
-# Plotting
-from reportlab.lib import colors
-from reportlab.lib.units import cm
-from Bio.Graphics import GenomeDiagram
+# PLOTTING
+import numpy as np
+import matplotlib.pyplot as plt
 
 from optparse import OptionParser
+
+# ------------------------------------------------------------------------------------------------------------------------
+
+class LASTregion:
+	"""LAST region class"""
+
+	def __init__(self, array):
+		self.loc = array[1]
+		self.pos = int(array[2])
+		self.len = int(array[3])
+		self.strand = array[4]
+		#self.totlen = int(array[5])
+		self.seq = array[6]
+
+class LASTmapping:
+	"""LAST mapping class"""
+	
+	def __init__(self, score, ref, aln):
+		self.score = score
+		self.ref = LASTregion(ref)
+		self.aln = LASTregion(aln)
+
+	def __lt__(self, other):
+		return self.score < other.score
+
+	def __len__(self):
+		return self.ref.len
+
+# ------------------------------------------------------------------------------------------------------------------------
 
 parser = OptionParser()
 parser.add_option("--bam",   dest="bam_file",	 help="Path of BAM file to parse",			default=False)
 parser.add_option("--last",  dest="last_file",	 help="Path of LAST file to parse",			default=False)
 parser.add_option("--reg",   dest="region_file", help="Regions of interest BED file",		default=False)
-parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=250)
-parser.add_option("--nral",  dest="nr_align",	 help="Number of alignments to display",	default=10)
+parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=300)
+parser.add_option("--nral",  dest="nr_align",	 help="Number of alignments to display",	default=15)
 (options, args) = parser.parse_args()
 
+# ------------------------------------------------------------------------------------------------------------------------
 
 def check_arguments(options):
 	#print("Checking arguments")
@@ -46,9 +70,7 @@ def check_arguments(options):
 	return True
 
 
-def gather_sv_data(options):
-	collection = []
-	
+def gather_sv_data(options, collection):
 	# Read regions of interest BED file
 	regions = BedTool(options.region_file)
 
@@ -60,25 +82,19 @@ def gather_sv_data(options):
 		for read in bamfile.fetch(reg.chrom, reg.start, reg.end):
 			#print read
 			if read.query_name.endswith("2d"):
-				collection.append(read.query_name)
+				collection[read.query_name] = []
 				#print read.reference_id, read.reference_start, read.reference_end
 				#print read.query_name, read.query_alignment_start, read.query_alignment_end
 
 	bamfile.close()
-	return collection
-
-
 
 
 def isHeaderLine(line):
 	return line.startswith("#")
 
-def gather_alt_mappings(options, collection):
-	# Prepare feature set
-	alt_mappings = {}
-	for read in collection:
-		alt_mappings[read] = SeqRecord(Seq("ATCGTCGTA"), id=read, name=read)
 
+
+def gather_alt_mappings(options, collection):
 	# Parse LAST file
 	with open(options.last_file,'r') as f:
 		for line in dropwhile(isHeaderLine, f):
@@ -99,26 +115,26 @@ def gather_alt_mappings(options, collection):
 				strand = -1
 
 			if (read[1] in collection and score >= options.qual_score):
-				feature = SeqFeature(FeatureLocation(int(read[2]), int(read[3]), strand=strand), type="Read", ref=ref[1])
-				alt_mappings[read[1]].features.append(feature)
+				collection[read[1]].append(LASTmapping(score, ref, read))
 
-				print "%i %s:%s-%s  -> %s:%s-%s" %(score, read[1], read[2], read[3], ref[1], ref[2], ref[3])
-
-	return alt_mappings
+				#print "%i %s:%s-%s  -> %s:%s-%s" %(score, read[1], read[2], read[3], ref[1], ref[2], ref[3])
 
 
-def plot_alt_mappings(options, alt_mappings):
+def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
-	color = int(ref[1])
+	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
 
-	for read in alt_mappings:
-		alt_mappings[read].add_feature(feature, color=color, label=True)
+	for read in collection:
+		print read, collection[read]
+		
 
-
+# ------------------------------------------------------------------------------------------------------------------------
 
 if check_arguments(options):
-	collection = gather_sv_data(options)
-	alt_mappings = gather_alt_mappings(options, collection)
+	collection = {}
+	gather_sv_data(options, collection)
+	gather_alt_mappings(options, collection)
+	plot_alt_mappings(options, collection)
 
 print("DONE")
 
