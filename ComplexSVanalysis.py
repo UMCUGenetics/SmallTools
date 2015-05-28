@@ -159,6 +159,10 @@ def plot_alt_mappings(options, collection):
 
 		#alignments = collection[read].sort()
 		alignments = collection[read]
+
+		if len(alignments) == 0:
+			continue
+			
 		ax.set_xlim(0,alignments[0].aln.totlen)
 		ax.set_ylim(options.qual_score,10000)
 
@@ -172,7 +176,7 @@ def plot_alt_mappings(options, collection):
 					
 		ax.broken_barh(bars, (0, alignments[i].score), facecolors=cols)
 
-		axself.set_yticks(range(options.qual_score,10000,250))
+		ax.set_yticks(range(options.qual_score,10000,250))
 		ax.grid(True)
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Quality score')
