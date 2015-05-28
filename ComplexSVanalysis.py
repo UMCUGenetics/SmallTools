@@ -160,7 +160,7 @@ def plot_alt_mappings(options, collection):
 		for i in range(0, options.nr_align):
 			tup = (alignments[i].aln.pos,alignments[i].aln.totlen)
 			bars.append(tup)
-			cols.append(color_list[alignments.ref.loc])
+			cols.append(color_list[alignments[i].ref.loc])
 					
 		ax.broken_barh(bars, (0, alignments[i].score), facecolors=cols)
 
