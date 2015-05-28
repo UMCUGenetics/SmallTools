@@ -162,9 +162,6 @@ def plot_alt_mappings(options, collection):
 	for j in range(0, 24):
 		handles.append(mpatches.Patch(color=color_list[j], label=chroms[j]))
 	
-	#red_patch = mpatches.Patch(color='red', label='The red data')
-	#plt.legend(handles=[red_patch])
-
 
 	for read in collection:
 		#print read, collection[read]
@@ -172,12 +169,9 @@ def plot_alt_mappings(options, collection):
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
 
-		#alignments = collection[read].sort()
-		alignments = collection[read]
-		sortaln = sorted(alignments, reverse=True)
-		#print(sortaln)
+		sortaln = sorted(collection[read], reverse=True)
 
-		if len(alignments) == 0:
+		if len(sortaln) == 0:
 			continue
 
 		# SET plot limits
@@ -199,10 +193,6 @@ def plot_alt_mappings(options, collection):
 			patch = mpatches.FancyBboxPatch(xy, width, 0.4, BoxStyle(direction), color=col, alpha=0.6, label=sortaln[i].ref.loc)
 			ax.add_patch(patch)
 
-		# Add all reads
-		#collection = PatchCollection(patches, cmap=plt.cm.hsv, alpha=0.6)
-		
-
 		# Mark-up of plot
 		ax.set_yticks(range(-10, 10, 1))
 		ax.grid(True)
@@ -211,9 +201,10 @@ def plot_alt_mappings(options, collection):
 
 		# Shrink plot to accomodate legend
 		box = ax.get_position()
-		ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
+		ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
+
 		# Add color legend
-		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., ncol=1, prop={'size':6})
+		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., ncol=1, prop={'size':8})
 
 		# SAVE file
 		fig.savefig(read+'.pdf')
