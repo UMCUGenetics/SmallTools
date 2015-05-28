@@ -154,7 +154,7 @@ def plot_alt_mappings(options, collection):
 	#print len(color_list)
 
 	handles = []
-	for j in range(0, color_list):
+	for j in range(0, 24):
 		handles.append(mpatches.Patch(color=color_list[j], label=chroms[j]))
 	
 	#red_patch = mpatches.Patch(color='red', label='The red data')
