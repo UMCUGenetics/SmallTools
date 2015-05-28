@@ -74,7 +74,7 @@ parser.add_option("--bam",   dest="bam_file",	 help="Path of BAM file to parse",
 parser.add_option("--last",  dest="last_file",	 help="Path of LAST file to parse",			default=False)
 parser.add_option("--reg",   dest="region_file", help="Regions of interest BED file",		default=False)
 parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=300)
-parser.add_option("--nral",  dest="nr_align",	 help="Number of alignments to display",	default=15)
+parser.add_option("--nral",  dest="nr_align",	 help="Number of alignments to display",	default=20)
 (options, args) = parser.parse_args()
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -149,6 +149,7 @@ def gather_alt_mappings(options, collection):
 def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
 	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
+	chroms = [str(x) for x in range(1,25)]
 	#print len(color_list)
 
 	for read in collection:
@@ -159,7 +160,7 @@ def plot_alt_mappings(options, collection):
 
 		#alignments = collection[read].sort()
 		alignments = collection[read]
-		sortaln = sorted(alignments)
+		sortaln = sorted(alignments, reverse=True)
 		print(sortaln)
 
 		if len(alignments) == 0:
@@ -182,6 +183,8 @@ def plot_alt_mappings(options, collection):
 		ax.grid(True)
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Quality score')
+
+		ax.legend(colors, chroms, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
 		#plt.show()
 		fig.savefig('test.pdf')
