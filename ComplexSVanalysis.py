@@ -2,8 +2,20 @@
 import sys
 import os
 #import multiprocessing
+from itertools import *
+
+# BAM and BED handling
 import pysam
 from pybedtools import BedTool
+
+# BIO
+from Bio.Seq import Seq
+from Bio.SeqRecord import SeqRecord
+
+# Plotting
+from reportlab.lib import colors
+from reportlab.lib.units import cm
+from Bio.Graphics import GenomeDiagram
 
 from optparse import OptionParser
 
@@ -55,12 +67,17 @@ def gather_sv_data(options):
 	return collection
 
 
-from itertools import *
+
 
 def isHeaderLine(line):
 	return line.startswith("#")
 
 def gather_alt_mappings(options, collection):
+	# Prepare feature set
+	alt_mappings = {}
+	for read in collection:
+		alt_mappings[read] = SeqRecord(Seq("ATCGTCGTA"), id=read, name=read)
+
 	# Parse LAST file
 	with open(options.last_file,'r') as f:
 		for line in dropwhile(isHeaderLine, f):
@@ -71,18 +88,28 @@ def gather_alt_mappings(options, collection):
 
 			lines_gen = islice(f, 4)
 
-			a = line.strip()
-			b = next(lines_gen).strip()
-			c = next(lines_gen).strip()
-			d = next(lines_gen)
+			score = int(line.strip().split("=")[1])
+			ref =  next(lines_gen).strip().split()
+			read = next(lines_gen).strip().split()
+			empty = next(lines_gen)
 
-			score = int(a.split("=")[1])
-			ref =  b.split()
-			read = c.split()
+			strand = 1
+			if read[4] == '-':
+				strand = -1
 
 			if (read[1] in collection and score >= options.qual_score):
-				print read[1], score, ref[1], ref[2]
+				feature = SeqFeature(FeatureLocation(int(read[2]), int(read[3]), strand=strand), type="Read", ref=ref[1])
+				alt_mappings[read[1]].features.append(feature)
 
+				print "%i %s:%s-%s  -> %s:%s-%s" %(score, read[1], read[2], read[3], ref[1], ref[2], ref[3])
+
+
+def plot_alt_mappings(options, alt_mappings):
+	#GenomeDiagram.FeatureSet()
+	color = int(ref[1])
+
+	for read in alt_mappings:
+		alt_mappings[read].add_feature(feature, color=color, label=True)
 
 
 
