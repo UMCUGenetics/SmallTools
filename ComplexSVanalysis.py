@@ -10,6 +10,8 @@ from pybedtools import BedTool
 
 # PLOTTING
 import numpy as np
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 
 from optparse import OptionParser
@@ -22,10 +24,16 @@ class LASTregion:
 	def __init__(self, array):
 		self.loc = array[1]
 		self.pos = int(array[2])
-		self.len = int(array[3])
+		self.length = int(array[3])
 		self.strand = array[4]
 		self.totlen = int(array[5])
 		self.seq = array[6]
+
+		def __repr__(self):
+			return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
+
+		def __str__(self):
+			return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
 
 class LASTmapping:
 	"""LAST mapping class"""
@@ -40,6 +48,13 @@ class LASTmapping:
 
 	def __len__(self):
 		return self.aln.totlen
+
+	def __repr__(self):
+		return "%i %s -> %s" %(self.score, self.aln, self.ref)
+	
+	def __str__(self):
+		return "%i %s -> %s" %(self.score, self.aln, self.ref)
+
 
 # ------------------------------------------------------------------------------------------------------------------------
 
@@ -126,12 +141,13 @@ def plot_alt_mappings(options, collection):
 	#print color_list
 
 	for read in collection:
-		#print read, collection[read]
+		print read, collection[read]
 
-		fig, ax = plt.subplots()
-				
+		fig = plt.figure()
+		ax = fig.add_subplot(111)
+
 		alignments = collection[read].sort()
-		ax.set_xlim(0,len(alignments[0]))
+		ax.set_xlim(0,alignments[0].aln.totlen)
 		ax.set_ylim(options.qual_score,10000)
 
 		bars = []
@@ -148,7 +164,7 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Quality score')
 
-		plt.show()
+		#plt.show()
 		fig.savefig('test.pdf')
 
 # ------------------------------------------------------------------------------------------------------------------------
