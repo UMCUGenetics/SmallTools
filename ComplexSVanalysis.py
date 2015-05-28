@@ -13,6 +13,7 @@ import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
 
 from optparse import OptionParser
 
@@ -152,6 +153,14 @@ def plot_alt_mappings(options, collection):
 	chroms = [str(x) for x in range(1,25)]
 	#print len(color_list)
 
+	handles = []
+	for j in range(0, color_list):
+		handles.append(mpatches.Patch(color=color_list[j], label=chroms[j]))
+	
+	#red_patch = mpatches.Patch(color='red', label='The red data')
+	#plt.legend(handles=[red_patch])
+
+
 	for read in collection:
 		#print read, collection[read]
 
@@ -184,7 +193,7 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Quality score')
 
-		ax.legend(color_list, chroms, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
+		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
 		#plt.show()
 		fig.savefig('test.pdf')
