@@ -11,7 +11,7 @@ from pybedtools import BedTool
 # BIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
-from Bio.SeqFeature import SeqFeature
+from Bio.SeqFeature import SeqFeature, FeatureLocation
 
 # Plotting
 from reportlab.lib import colors
