@@ -15,6 +15,7 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import matplotlib.patches as mpatches
+from matplotlib.patches import BoxStyle
 from matplotlib.collections import PatchCollection
 
 from optparse import OptionParser
@@ -112,6 +113,8 @@ def gather_sv_data(options, collection):
 			#print read
 			if read.query_name.endswith("2d"):
 				collection[read.query_name] = []
+			if read.query_name.startswith("ctg"):
+				collection[read.query_name] = []
 				#print read.reference_id, read.reference_start, read.reference_end
 				#print read.query_name, read.query_alignment_start, read.query_alignment_end
 
@@ -181,22 +184,24 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlim(0, sortaln[0].aln.totlen)
 		ax.set_ylim(-10, 10)
 
-		patches = []
-		#colors = []
 		for i in range(0, options.nr_align):
 			
 			score = log(sortaln[i].score)
+			direction = "RArrow"
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
+				direction = "LArrow"
 
 			col = color_list[sortaln[i].ref.get_loc()]
-			patches.append( mpatches.Arrow(sortaln[i].aln.pos, score, sortaln[i].aln.length, 0.0, width=1.0, label=str(sortaln[i].ref.get_loc()), color=col) )
-			#colors.append(col)
+			xy = (sortaln[i].aln.pos, score-0.2)
+			width = sortaln[i].aln.length
+			
+			patch = mpatches.FancyBboxPatch(xy, width, 0.4, BoxStyle(direction), color=col, alpha=0.6, label=sortaln[i].ref.loc)
+			ax.add_patch(patch)
 
 		# Add all reads
-		collection = PatchCollection(patches, cmap=plt.cm.hsv, alpha=0.6)
-		#collection.set_array(np.array(colors))
-		ax.add_collection(collection)
+		#collection = PatchCollection(patches, cmap=plt.cm.hsv, alpha=0.6)
+		
 
 		# Mark-up of plot
 		ax.set_yticks(range(-10, 10, 1))
@@ -204,10 +209,11 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlabel('Location within read')
 		ax.set_ylabel('Log(score)')
 
+		# Shrink plot to accomodate legend
+		box = ax.get_position()
+		ax.set_position([box.x0, box.y0, box.width * 0.8, box.height])
 		# Add color legend
-		ax.legend(handles=handles, lables=chroms)
-		#, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-		#plt.show()
+		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., ncol=1, prop={'size':6})
 
 		# SAVE file
 		fig.savefig(read+'.pdf')
