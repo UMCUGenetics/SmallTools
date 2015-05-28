@@ -205,7 +205,8 @@ def plot_alt_mappings(options, collection):
 		ax.set_position([box.x0, box.y0, box.width * 0.9, box.height])
 
 		# Add color legend
-		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., ncol=1, prop={'size':8})
+		ax.legend(bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0., ncol=1, prop={'size':8})
+		#handles=handles,
 
 		# SAVE file
 		fig.savefig(read+'.pdf')
