@@ -5,12 +5,13 @@ import os
 from itertools import *
 
 # BAM and BED handling
-import pysam
+from pysam import AlignmentFile
 from pybedtools import BedTool
 
 # BIO
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
+from Bio.SeqFeature import SeqFeature
 
 # Plotting
 from reportlab.lib import colors
@@ -52,7 +53,7 @@ def gather_sv_data(options):
 	regions = BedTool(options.region_file)
 
 	# Read BAM file
-	bamfile = pysam.AlignmentFile(options.bam_file, "rb")
+	bamfile = AlignmentFile(options.bam_file, "rb")
 
 	# Intersect regions
 	for reg in regions:
@@ -103,6 +104,8 @@ def gather_alt_mappings(options, collection):
 
 				print "%i %s:%s-%s  -> %s:%s-%s" %(score, read[1], read[2], read[3], ref[1], ref[2], ref[3])
 
+	return alt_mappings
+
 
 def plot_alt_mappings(options, alt_mappings):
 	#GenomeDiagram.FeatureSet()
@@ -115,7 +118,7 @@ def plot_alt_mappings(options, alt_mappings):
 
 if check_arguments(options):
 	collection = gather_sv_data(options)
-	gather_alt_mappings(options, collection)
+	alt_mappings = gather_alt_mappings(options, collection)
 
 print("DONE")
 
