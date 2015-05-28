@@ -177,7 +177,7 @@ def plot_alt_mappings(options, collection):
 			continue
 
 		ax.set_xlim(0, sortaln[0].aln.totlen)
-		ax.set_ylim(5, 15)
+		ax.set_ylim(-10, 10)
 
 		bars = []
 		cols = []
@@ -185,16 +185,21 @@ def plot_alt_mappings(options, collection):
 		for i in range(0, options.nr_align):
 			tup = (sortaln[i].aln.pos, sortaln[i].aln.length)
 			bars.append(tup)
-			cols.append(color_list[sortaln[i].ref.get_loc()])		
-			ax.broken_barh(bars, (0, log(sortaln[i].score)), facecolors=cols)
+			cols.append(color_list[sortaln[i].ref.get_loc()])	
 
-		ax.set_yticks(range(5, 15, 1))
+			score = log(sortaln[i].score)
+			if sortaln[i].aln.strand == '-':
+				score = score*-1
+
+			ax.broken_barh(bars, (score-0.1, score+0.1), facecolors=cols)
+
+		ax.set_yticks(range(-10, 10, 1))
 		ax.grid(True)
 		ax.set_xlabel('Loaction within read')
 		ax.set_ylabel('Log(score)')
 
-		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
-
+		ax.legend(handles=handles, lables=chroms)
+		#, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 		#plt.show()
 		fig.savefig('test.pdf')
 
