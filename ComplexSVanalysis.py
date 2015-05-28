@@ -156,12 +156,13 @@ def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
 	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
 	chroms = [str(x) for x in range(1,25)]
+	chroms[22] = "X"
+	chroms[23] = "Y"
 	#print len(color_list)
 
 	handles = []
 	for j in range(0, 24):
 		handles.append(mpatches.Patch(color=color_list[j], label=chroms[j]))
-	
 
 	for read in collection:
 		#print read, collection[read]
