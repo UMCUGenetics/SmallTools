@@ -176,32 +176,45 @@ def plot_alt_mappings(options, collection):
 		if len(alignments) == 0:
 			continue
 
+		# SET plot limits
 		ax.set_xlim(0, sortaln[0].aln.totlen)
 		ax.set_ylim(-10, 10)
 
 		bars = []
 		cols = []
+		scores = []
 
 		for i in range(0, options.nr_align):
-			tup = (sortaln[i].aln.pos, sortaln[i].aln.length)
-			bars.append(tup)
+			# BAR for aligned length
+			bars.append((sortaln[i].aln.pos, sortaln[i].aln.length))
+			
+			# COLOR by chromosome
 			cols.append(color_list[sortaln[i].ref.get_loc()])	
 
+			# Y value by score
 			score = log(sortaln[i].score)
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
 
-			ax.broken_barh(bars, (score-0.1, score+0.1), facecolors=cols)
+			scores.append((score-0.1, score+0.1))
 
+
+		# PLOT alignments
+		ax.broken_barh(bars, scores, facecolors=cols)
+
+		# Mark-up of plot
 		ax.set_yticks(range(-10, 10, 1))
 		ax.grid(True)
-		ax.set_xlabel('Loaction within read')
+		ax.set_xlabel('Location within read')
 		ax.set_ylabel('Log(score)')
 
+		# Add color legend
 		ax.legend(handles=handles, lables=chroms)
 		#, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 		#plt.show()
-		fig.savefig('test.pdf')
+
+		# SAVE file
+		fig.savefig(read+'.pdf')
 
 # ------------------------------------------------------------------------------------------------------------------------
 
