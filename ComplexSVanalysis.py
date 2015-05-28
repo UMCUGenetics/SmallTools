@@ -35,6 +35,14 @@ class LASTregion:
 	def __str__(self):
 		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
 
+	def get_loc(self):
+		if self.loc == 'X':
+			return 23
+		elif self.loc == 'Y':
+			return 24
+		else
+			return int(self.loc)
+
 class LASTmapping:
 	"""LAST mapping class"""
 	
@@ -141,10 +149,10 @@ def gather_alt_mappings(options, collection):
 def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
 	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
-	#print color_list
+	#print len(color_list)
 
 	for read in collection:
-		print read, collection[read]
+		#print read, collection[read]
 
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
@@ -160,7 +168,7 @@ def plot_alt_mappings(options, collection):
 		for i in range(0, options.nr_align):
 			tup = (alignments[i].aln.pos,alignments[i].aln.totlen)
 			bars.append(tup)
-			cols.append(color_list[alignments[i].ref.loc])
+			cols.append(color_list[alignments[i].ref.get_loc()])
 					
 		ax.broken_barh(bars, (0, alignments[i].score), facecolors=cols)
 
