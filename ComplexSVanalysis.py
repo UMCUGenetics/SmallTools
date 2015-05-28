@@ -3,6 +3,7 @@
 # GENERAL
 import os
 from itertools import dropwhile, islice
+from math import log
 
 # BAM and BED handling
 from pysam import AlignmentFile, AlignedSegment
@@ -170,28 +171,27 @@ def plot_alt_mappings(options, collection):
 		#alignments = collection[read].sort()
 		alignments = collection[read]
 		sortaln = sorted(alignments, reverse=True)
-		print(sortaln)
+		#print(sortaln)
 
 		if len(alignments) == 0:
 			continue
 
-		ax.set_xlim(0,alignments[0].aln.totlen)
-		ax.set_ylim(options.qual_score,10000)
+		ax.set_xlim(0, sortaln[0].aln.totlen)
+		ax.set_ylim(5, 15)
 
 		bars = []
 		cols = []
 
 		for i in range(0, options.nr_align):
-			tup = (sortaln[i].aln.pos, sortaln[i].aln.totlen)
+			tup = (sortaln[i].aln.pos, sortaln[i].aln.length)
 			bars.append(tup)
-			cols.append(color_list[sortaln[i].ref.get_loc()])
-					
-		ax.broken_barh(bars, (0, sortaln[i].score), facecolors=cols)
+			cols.append(color_list[sortaln[i].ref.get_loc()])		
+			ax.broken_barh(bars, (0, log(sortaln[i].score)), facecolors=cols)
 
-		ax.set_yticks(range(options.qual_score,10000,250))
+		ax.set_yticks(range(5, 15, 1))
 		ax.grid(True)
 		ax.set_xlabel('Loaction within read')
-		ax.set_ylabel('Quality score')
+		ax.set_ylabel('Log(score)')
 
 		ax.legend(handles=handles, bbox_to_anchor=(1.05, 1), loc=2, borderaxespad=0.)
 
