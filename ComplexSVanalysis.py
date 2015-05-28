@@ -180,27 +180,13 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlim(0, sortaln[0].aln.totlen)
 		ax.set_ylim(-10, 10)
 
-		bars = []
-		cols = []
-		scores = []
-
 		for i in range(0, options.nr_align):
-			# BAR for aligned length
-			bars.append((sortaln[i].aln.pos, sortaln[i].aln.length))
 			
-			# COLOR by chromosome
-			cols.append(color_list[sortaln[i].ref.get_loc()])	
-
-			# Y value by score
 			score = log(sortaln[i].score)
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
 
-			scores.append((score-0.1, score+0.1))
-
-
-		# PLOT alignments
-		ax.broken_barh(bars, scores, facecolors=cols)
+			ax.broken_barh((sortaln[i].aln.pos, sortaln[i].aln.length), (score-0.1, score+0.1), facecolors=color_list[sortaln[i].ref.get_loc()])
 
 		# Mark-up of plot
 		ax.set_yticks(range(-10, 10, 1))
