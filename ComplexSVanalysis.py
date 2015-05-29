@@ -165,7 +165,7 @@ def plot_alt_mappings(options, collection):
 		handles.append(mpatches.Patch(color=color_list[j], label=chroms[j]))
 
 	for read in collection:
-		#print read, collection[read]
+		print read
 
 		fig = plt.figure()
 		ax = fig.add_subplot(111)
@@ -179,7 +179,8 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlim(0, sortaln[0].aln.totlen)
 		ax.set_ylim(-10, 10)
 
-		for i in range(0, options.nr_align):
+		nr_reads <- min(options.nr_align, len(sortaln[i]))
+		for i in range(0, nr_reads):
 			
 			score = log(sortaln[i].score)
 			direction = "RArrow"
@@ -210,6 +211,7 @@ def plot_alt_mappings(options, collection):
 
 		# SAVE file
 		fig.savefig(read+'.pdf')
+		fig.close()
 
 # ------------------------------------------------------------------------------------------------------------------------
 
