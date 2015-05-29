@@ -181,7 +181,7 @@ def plot_alt_mappings(options, collection):
 
 		nr_reads = min(options.nr_align, len(sortaln))
 		for i in range(0, nr_reads):
-			if i <= 3:
+			if i <= 10:
 				print(sortaln[i])
 			col = color_list[sortaln[i].ref.get_loc()]
 			width = sortaln[i].aln.length
@@ -191,7 +191,7 @@ def plot_alt_mappings(options, collection):
 			xpos = sortaln[i].aln.pos
 
 			if sortaln[i].aln.strand == '-':
-				score = score*-1
+				score = score * -1
 				direction = "LArrow"
 				xpos = sortaln[i].aln.totlen-sortaln[i].aln.pos-width
 			
