@@ -211,7 +211,7 @@ def plot_alt_mappings(options, collection):
 
 		# SAVE file
 		fig.savefig(read+'.pdf')
-		fig.close()
+		plt.close(fig)
 
 # ------------------------------------------------------------------------------------------------------------------------
 
