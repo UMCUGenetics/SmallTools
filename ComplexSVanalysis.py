@@ -154,7 +154,7 @@ def gather_alt_mappings(options, collection):
 
 def plot_alt_mappings(options, collection):
 	#GenomeDiagram.FeatureSet()
-	color_list = plt.cm.Set1(np.linspace(0, 1, 24))
+	color_list = plt.cm.Set1(np.linspace(0, 1, 25))
 	chroms = [str(x) for x in range(1,25)]
 	chroms[22] = "X"
 	chroms[23] = "Y"
