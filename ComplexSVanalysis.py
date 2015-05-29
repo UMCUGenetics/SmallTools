@@ -34,10 +34,10 @@ class LASTregion:
 		self.seq = array[6]
 
 	def __repr__(self):
-		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
+		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length, self.strand)
 
 	def __str__(self):
-		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length)
+		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length, self.strand)
 
 	def get_loc(self):
 		if self.loc == 'X':
@@ -181,7 +181,8 @@ def plot_alt_mappings(options, collection):
 
 		nr_reads = min(options.nr_align, len(sortaln))
 		for i in range(0, nr_reads):
-
+			if i <= 3:
+				print(sortaln[i])
 			col = color_list[sortaln[i].ref.get_loc()]
 			width = sortaln[i].aln.length
 
@@ -194,7 +195,7 @@ def plot_alt_mappings(options, collection):
 				direction = "LArrow"
 				xpos = sortaln[i].aln.totlen-sortaln[i].aln.pos-width
 			
-			xy = (xpos, score-0.2)
+			xy = (xpos, score-0.1)
 			patch = mpatches.FancyBboxPatch(xy, width, 0.2, BoxStyle(direction), facecolor=col, edgecolor='black', alpha=0.7, label=sortaln[i].ref.loc)
 			ax.add_patch(patch)
 
