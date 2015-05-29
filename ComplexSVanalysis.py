@@ -34,10 +34,10 @@ class LASTregion:
 		self.seq = array[6]
 
 	def __repr__(self):
-		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length, self.strand)
+		return "%s:%i-%i %s" %(self.loc, self.pos, self.pos+self.length, self.strand)
 
 	def __str__(self):
-		return "%s:%i-%i" %(self.loc, self.pos, self.pos+self.length, self.strand)
+		return "%s:%i-%i %s" %(self.loc, self.pos, self.pos+self.length, self.strand)
 
 	def get_loc(self):
 		if self.loc == 'X':
