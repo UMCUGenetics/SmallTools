@@ -195,7 +195,7 @@ def plot_alt_mappings(options, collection):
 				xpos = sortaln[i].aln.totlen-sortaln[i].aln.pos-width
 			
 			xy = (xpos, score-0.2)
-			patch = mpatches.FancyBboxPatch(xy, width, 0.2, BoxStyle(direction), color=col, edgecolor='black', alpha=0.7, label=sortaln[i].ref.loc)
+			patch = mpatches.FancyBboxPatch(xy, width, 0.2, BoxStyle(direction), facecolor=col, edgecolor='black', alpha=0.7, label=sortaln[i].ref.loc)
 			ax.add_patch(patch)
 
 		# Mark-up of plot
