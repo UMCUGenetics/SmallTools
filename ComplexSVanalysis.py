@@ -179,7 +179,7 @@ def plot_alt_mappings(options, collection):
 		ax.set_xlim(0, sortaln[0].aln.totlen)
 		ax.set_ylim(-10, 10)
 
-		nr_reads <- min(options.nr_align, len(sortaln[i]))
+		nr_reads = min(options.nr_align, len(sortaln[i]))
 		for i in range(0, nr_reads):
 			
 			score = log(sortaln[i].score)
