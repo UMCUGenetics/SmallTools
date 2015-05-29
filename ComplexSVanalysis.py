@@ -181,18 +181,21 @@ def plot_alt_mappings(options, collection):
 
 		nr_reads = min(options.nr_align, len(sortaln))
 		for i in range(0, nr_reads):
-			
+
+			col = color_list[sortaln[i].ref.get_loc()]
+			width = sortaln[i].aln.length
+
 			score = log(sortaln[i].score)
 			direction = "RArrow"
+			xops = sortaln[i].aln.pos
+
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
 				direction = "LArrow"
-
-			col = color_list[sortaln[i].ref.get_loc()]
-			xy = (sortaln[i].aln.pos, score-0.2)
-			width = sortaln[i].aln.length
+				xpos = sortaln[i].aln.totlen-sortaln[i].aln.pos-width
 			
-			patch = mpatches.FancyBboxPatch(xy, width, 0.4, BoxStyle(direction), color=col, alpha=0.6, label=sortaln[i].ref.loc)
+			xy = (xpos, score-0.2)
+			patch = mpatches.FancyBboxPatch(xy, width, 0.2, BoxStyle(direction), color=col, edgecolor='black', alpha=0.7, label=sortaln[i].ref.loc)
 			ax.add_patch(patch)
 
 		# Mark-up of plot
