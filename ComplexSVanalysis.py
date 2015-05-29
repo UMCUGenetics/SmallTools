@@ -187,7 +187,7 @@ def plot_alt_mappings(options, collection):
 
 			score = log(sortaln[i].score)
 			direction = "RArrow"
-			xops = sortaln[i].aln.pos
+			xpos = sortaln[i].aln.pos
 
 			if sortaln[i].aln.strand == '-':
 				score = score*-1
