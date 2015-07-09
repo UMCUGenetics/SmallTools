@@ -3,6 +3,15 @@
 import pysam
 import os
 
+from optparse import OptionParser
+
+parser = OptionParser()
+parser.add_option("--sambamba",	 dest="sambamba", help="Path to sambamba/samtools executable",   default="sambamba")
+parser.add_option("--bamdir",	 dest="bamdir",   help="Path to directory containing bam files", default=False)
+parser.add_option("--outdir",	 dest="outdir",   help="Path to directory to write output to",   default="./telomeres/")
+
+(options, args) = parser.parse_args()
+
 #TODO implement argparse to get these variables
 sambamba = "/path/to/sambamba/sambamba_vx.x"
 workdir = "/path/to/working/directory/"
