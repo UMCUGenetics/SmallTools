@@ -74,7 +74,7 @@ def main():
             print("Indexing performed")
         
         # generate Telomere reads file name   
-        telofile = bamfile.replace(bamdir,outdir).replace(".bam","_TelomericReads.sam"))
+        telofile = bamfile.replace(bamdir,outdir).replace(".bam","_TelomericReads.sam")
         
         # generate Telomere reads file
         print(bamfile,telofile)
