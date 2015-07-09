@@ -55,7 +55,7 @@ def main():
         return 1
     
     # for all bamfiles
-    for filename in os.path.join(options.bamdir, "*.bam"):
+    for filename in glob.glob(os.path.join(options.bamdir, "*.bam")):
         #print(filename)
         bamfile = os.path.join(options.bamdir, filename)
         baifile = bamfile+".bai"
