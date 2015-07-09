@@ -46,7 +46,7 @@ def count_telomeric_reads(bamfile, telofile):
     total_rc = reduce(lambda x, y: x + y, [ eval('+'.join(l.rstrip('\n').split('\t')[2:]) ) for l in pysam.idxstats(bamfile) ])
             
     # count number of telomeric reads by line count
-    telomere_rc = sum(1 for line in with open(telofile,'r'))
+    telomere_rc = sum(1 for line in open(telofile,'r'))
             
     # print counts
     return([total_rc, telomere_rc])
