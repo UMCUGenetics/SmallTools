@@ -65,16 +65,17 @@ def main():
         
     # for all bamfiles
     for bamfile in glob.glob(os.path.join(options.bamdir, "*.bam")):
-        baifile = bamfile+".bai"
         
+        baifile = bamfile+".bai"
         # check if index file exists
         if not os.path.exists(baifile):
             print("No index file found for %s, indexing now"%(bamfile))
             os.system(options.sambamba + " index " + bamfile)
             print("Indexing performed")
         
+        
         # generate Telomere reads file name   
-        telofile = bamfile.replace(bamdir,outdir).replace(".bam","_TelomericReads.sam")
+        telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
         
         # generate Telomere reads file
         print(bamfile,telofile)
