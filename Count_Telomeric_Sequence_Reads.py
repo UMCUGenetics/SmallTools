@@ -63,7 +63,7 @@ def main():
         # check if index file exists
         if not os.path.exists(baifile):
             print("No index file found, indexing now")
-            os.system(sambamba + " index " + bamfile)
+            os.system(options.sambamba + " index " + bamfile)
             print("Indexing performed")
         
         # generate Telomere reads file name   
