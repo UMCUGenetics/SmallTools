@@ -45,8 +45,8 @@ def count_telomeric_reads(bamfile, telofile):
     # count total number of reads
     total_rc = reduce(lambda x, y: x + y, [ eval('+'.join(l.rstrip('\n').split('\t')[2:]) ) for l in pysam.idxstats(bamfile) ])
             
-    # count number of telomeric reads
-    telomere_rc = os.system("wc -l "+telofile)
+    # count number of telomeric reads by line count
+    telomere_rc = sum(1 for line in with open(telofile,'r'))
             
     # print counts
     return([total_rc, telomere_rc])
@@ -78,7 +78,7 @@ def main():
         telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
         
         # generate Telomere reads file
-        print(bamfile,telofile)
+        # print(bamfile,telofile)
         counts = count_telomeric_reads(bamfile, telofile)
         output.write('\t'.join([bamfile.split("/")[0].split("_")[0],str(counts[0]), str(counts[1]), str((counts[1]/counts[0])*1000)])+'\n')
     
