@@ -62,7 +62,7 @@ def main():
         
         # check if index file exists
         if not os.path.exists(baifile):
-            print("No index file found, indexing now")
+            print("No index file found for %s, indexing now"%(bamfile))
             os.system(options.sambamba + " index " + bamfile)
             print("Indexing performed")
         
