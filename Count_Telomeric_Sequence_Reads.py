@@ -61,7 +61,7 @@ def main():
     # open output file
     output = open(os.path.join(options.outdir, "TelomereCounts.txt"),'w')
     # write header
-    output.write('\t'.join("#Sample","TotalReads","TelomericReads","NormalisedFraction")+'\n')
+    output.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
         
     # for all bamfiles
     for filename in glob.glob(os.path.join(options.bamdir, "*.bam")):
@@ -81,7 +81,7 @@ def main():
         # generate Telomere reads file
         print(bamfile,telofile)
         counts = count_telomeric_reads(bamfile, telofile)
-        output.write('\t'.join(filename,counts[0], ((counts[1],counts[1]/counts[0])*1000))+'\n')
+        output.write('\t'.join([filename,counts[0], ((counts[1],counts[1]/counts[0])*1000)])+'\n')
     
     output.close()
 
