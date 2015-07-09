@@ -64,9 +64,7 @@ def main():
     output.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
         
     # for all bamfiles
-    for filename in glob.glob(os.path.join(options.bamdir, "*.bam")):
-        print(filename)
-        bamfile = os.path.join(options.bamdir, filename)
+    for bamfile in glob.glob(os.path.join(options.bamdir, "*.bam")):
         baifile = bamfile+".bai"
         
         # check if index file exists
@@ -76,12 +74,12 @@ def main():
             print("Indexing performed")
         
         # generate Telomere reads file name   
-        telofile = os.path.join(options.outdir, filename.replace(".bam","_TelomericReads.sam"))
+        telofile = bamfile.replace(bamdir,outdir).replace(".bam","_TelomericReads.sam"))
         
         # generate Telomere reads file
         print(bamfile,telofile)
         counts = count_telomeric_reads(bamfile, telofile)
-        output.write('\t'.join([filename.split("_")[0],counts[0], ((counts[1],counts[1]/counts[0])*1000)])+'\n')
+        output.write('\t'.join([bamfile.split("/")[0].split("_")[0],str(counts[0]), str(counts[1]), str((counts[1]/counts[0])*1000)])+'\n')
     
     output.close()
 
