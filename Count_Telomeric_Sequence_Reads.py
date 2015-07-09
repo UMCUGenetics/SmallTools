@@ -27,7 +27,11 @@ def check_arguments():
         except OSError:
             print("Invalid / unable to create, output folder %s"%(options.outdir))
             return False
-        
+    
+    print("Running with the following settings:")
+    print("------------------------------------")
+    print(options)
+    print("------------------------------------")
     return True
 
 # -------------------------------------------------
@@ -45,7 +49,7 @@ def count_telomeric_reads(bamfile, telofile):
     telomere_rc = os.system("wc -l "+telofile)
             
     # print counts
-    print(bamfile, total_rc, telomere_rc)
+    return([total_rc, telomere_rc])
     
 # -------------------------------------------------
 
@@ -54,6 +58,11 @@ def main():
     if not check_arguments():
         return 1
     
+    # open output file
+    output = open(os.path.join(options.outdir, "TelomereCounts.txt"),'w')
+    # write header
+    output.write('\t'.join("#Sample","TotalReads","TelomericReads","NormalisedFraction")+'\n')
+        
     # for all bamfiles
     for filename in glob.glob(os.path.join(options.bamdir, "*.bam")):
         #print(filename)
@@ -70,7 +79,11 @@ def main():
         telofile = os.path.join(options.outdir, filename.replace(".bam","_TelomericReads.sam"))
         
         # generate Telomere reads file
-        count_telomeric_reads(bamfile, telofile)
+        print(bamfile,telofile)
+        counts = count_telomeric_reads(bamfile, telofile)
+        output.write('\t'.join(filename,counts[0], ((counts[1],counts[1]/counts[0])*1000))+'\n')
+    
+    output.close()
 
 # -------------------------------------------------
 # Execute program
