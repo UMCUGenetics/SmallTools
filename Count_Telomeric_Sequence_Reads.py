@@ -49,7 +49,7 @@ def count_telomeric_reads(bamfile, q):
     
     # check if the file was already generated
     if not os.path.exists(telofile):
-        print("---- Processing BAM file: "+bamfile)
+        # print("---- Processing BAM file: "+bamfile)
         # extract telomeric reads and write to file
         cmd = options.sambamba+" view "+bamfile+" -t "+ str(options.nr_cpus) +" | LC_ALL=C grep -E \"" + "TTAGGG"*options.repsize +"|"+ "CCCTAA"*options.repsize + "\"" + " > " + telofile
         print("++++ Generating SAM file: "+telofile)
@@ -84,7 +84,7 @@ def listener(q):
     
     while 1:
         m = q.get()
-        print(m)
+        #print(m)
         if m == 'kill':
             if not q.empty():
                 # received kill signal without finishing all the processes
