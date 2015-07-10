@@ -63,14 +63,7 @@ def count_telomeric_reads(bamfile):
     
 # -------------------------------------------------
 
-print("Starting Analysis")
-
-
-if __name__ == '__main__':
-    # check specified options
-    if not check_arguments():
-        break
-    
+def run():
     bamfiles = glob.glob(os.path.join(options.bamdir, "*.bam"))
     pool = Pool(processes=len(bamfiles)) 
     
@@ -96,6 +89,15 @@ if __name__ == '__main__':
         output.write(count)
     
     output.close()
+
+# -------------------------------------------------
+
+print("Starting Analysis")
+
+if __name__ == '__main__':
+    # check specified options
+    if check_arguments():
+        run()
 
 print("DONE")
 
