@@ -43,7 +43,8 @@ def check_arguments():
 # -------------------------------------------------
 
 def count_telomeric_reads(bamfile, q):
-    # generate Telomere reads file name   
+    # generate Telomere reads file name  
+    print("---- Processing BAM file: "+bamfile)
     telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
     
     # check if the file was already generated
@@ -60,7 +61,8 @@ def count_telomeric_reads(bamfile, q):
     # count number of telomeric reads by line count
     telomere_rc = sum(1 for line in open(telofile,'r'))
     
-    # return sample ID and count stats
+    print("DONE Processing BAM file: "+bamfile)
+    # return results
     result = '\t'.join([bamfile.split("/")[-1].split("_")[0],str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n'
     q.put(result)
     return(result)
