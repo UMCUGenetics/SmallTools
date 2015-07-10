@@ -45,7 +45,7 @@ def check_arguments():
 
 def count_telomeric_reads(bamfile, q):
     # generate Telomere reads file name  
-    print("---- Processing BAM file: "+bamfile)
+    #print("---- Processing BAM file: "+bamfile)
     telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
     
     # check if the file was already generated
@@ -64,15 +64,12 @@ def count_telomeric_reads(bamfile, q):
     if os.path.exists(telofile):
         # count number of telomeric reads by line count
         telomere_rc = sum(1 for line in open(telofile,'r'))
-        print("DONE Processing BAM file: "+bamfile)
+        #print("DONE Processing BAM file: "+bamfile)
     else:
         print("Something went wrong with BAM file: "+bamfile)
         
     # return results
-    print([str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])
-    result = '\t'.join([str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n'
-    print(result)
-    
+    result = [str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)]
     q.put(result)
     return(result)
 
@@ -88,6 +85,7 @@ def listener(q):
     
     while 1:
         m = q.get()
+        print(m)
         if m == 'kill':
             if not q.empty():
                 # received kill signal without finishing all the processes
@@ -97,7 +95,7 @@ def listener(q):
             sys.stdout.write('DONE\n')
             break
         
-        f.write(m)
+        f.write('\t'.join(m)+'\n')
         f.flush()
     f.close()
 # -------------------------------------------------
