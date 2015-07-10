@@ -4,6 +4,9 @@ import pysam
 import glob
 import os
 
+import subprocess
+from multiprocessing import Pool
+
 from optparse import OptionParser
 # -------------------------------------------------
 parser = OptionParser()
@@ -36,60 +39,64 @@ def check_arguments():
 
 # -------------------------------------------------
 
-def count_telomeric_reads(bamfile, telofile):
+def count_telomeric_reads(bamfile):
+
+    # generate Telomere reads file name   
+    telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
+    
     # check if the file was already generated
     if not os.path.exists(telofile):
         # extract telomeric reads and write to file
-        os.system(options.sambamba + " view " + bamfile + " | LC_ALL=C grep -E \"" + "TTAGGG"*options.repsize +"|"+ "CCCTAA"*options.repsize + "\"" + " > " + telofile + " & ")
-        # FIXME add waiting for successfull complete clause
-        return([0,0])
+        cmd = options.sambamba + " view " + bamfile + " | LC_ALL=C grep -E \"" + "TTAGGG"*options.repsize +"|"+ "CCCTAA"*options.repsize + "\"" + " > " + telofile
+        print("Generating sam file: "+telofile)
+        p = subprocess.Popen(cmd)
+        p.wait()
 
     # count total number of reads
     total_rc = reduce(lambda x, y: x + y, [ eval('+'.join(l.rstrip('\n').split('\t')[2:]) ) for l in pysam.idxstats(bamfile) ])
             
     # count number of telomeric reads by line count
     telomere_rc = sum(1 for line in open(telofile,'r'))
-            
-    # print counts
-    return([total_rc, telomere_rc])
+    
+    # return sample ID and count stats
+    return('\t'.join([bamfile.split("/")[-1].split("_")[0],str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n')
     
 # -------------------------------------------------
 
-def main():
+print("Starting Analysis")
+
+
+if __name__ == '__main__':
     # check specified options
     if not check_arguments():
         return 1
     
-    # open output file
-    output = open(os.path.join(options.outdir, "TelomereCounts.txt"),'w')
-    # write header
-    output.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
-        
-    # for all bamfiles
-    for bamfile in glob.glob(os.path.join(options.bamdir, "*.bam")):
+    bamfiles = glob.glob(os.path.join(options.bamdir, "*.bam"))
+    pool = Pool(processes=len(bamfiles)) 
+    
+    # check index for all bamfiles
+    for bamfile in bamfiles:
         
         baifile = bamfile+".bai"
         # check if index file exists
         if not os.path.exists(baifile):
             print("No index file found for %s, indexing now"%(bamfile))
-            os.system(options.sambamba + " index " + bamfile)
-            print("Indexing performed")
-        
-        
-        # generate Telomere reads file name   
-        telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
-        
-        # generate Telomere reads file
-        # print(bamfile,telofile)
-        counts = count_telomeric_reads(bamfile, telofile)
-        output.write('\t'.join([bamfile.split("/")[-1].split("_")[0],str(counts[0]), str(counts[1]), str((counts[1]/(counts[0]*1.0))*100000.0)])+'\n')
+            subprocess.call(options.sambamba, " index " + bamfile)
+    
+    # generate Telomere reads file
+    counts = pool.map(count_telomeric_reads, bamfiles)
+
+    # open output file
+    output = open(os.path.join(options.outdir, "TelomereCounts.txt"),'w')
+
+    # write header
+    output.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
+    # write results
+    for count in counts: 
+        output.write(count)
     
     output.close()
 
-# -------------------------------------------------
-# Execute program
-# -------------------------------------------------
-print("Starting analysis")
-main()
 print("DONE")
+
 # -------------------------------------------------
