@@ -69,7 +69,7 @@ print("Starting Analysis")
 if __name__ == '__main__':
     # check specified options
     if not check_arguments():
-        return 1
+        break
     
     bamfiles = glob.glob(os.path.join(options.bamdir, "*.bam"))
     pool = Pool(processes=len(bamfiles)) 
