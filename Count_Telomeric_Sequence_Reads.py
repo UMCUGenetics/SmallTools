@@ -41,6 +41,8 @@ def count_telomeric_reads(bamfile, telofile):
     if not os.path.exists(telofile):
         # extract telomeric reads and write to file
         os.system(options.sambamba + " view " + bamfile + " | LC_ALL=C grep -E \"" + "TTAGGG"*options.repsize +"|"+ "CCCTAA"*options.repsize + "\"" + " > " + telofile + " & ")
+        # FIXME add waiting for successfull complete clause
+        return([0,0])
 
     # count total number of reads
     total_rc = reduce(lambda x, y: x + y, [ eval('+'.join(l.rstrip('\n').split('\t')[2:]) ) for l in pysam.idxstats(bamfile) ])
