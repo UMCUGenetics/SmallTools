@@ -80,7 +80,7 @@ def main():
         # generate Telomere reads file
         # print(bamfile,telofile)
         counts = count_telomeric_reads(bamfile, telofile)
-        output.write('\t'.join([bamfile.split("/")[0].split("_")[0],str(counts[0]), str(counts[1]), str((counts[1]/counts[0])*1000)])+'\n')
+        output.write('\t'.join([bamfile.split("/")[-1].split("_")[0],str(counts[0]), str(counts[1]), str((counts[1]/(counts[0]*1.0))*100000.0)])+'\n')
     
     output.close()
 
