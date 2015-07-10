@@ -58,7 +58,7 @@ def count_telomeric_reads(bamfile, q):
     # count total number of reads
     total_rc = reduce(lambda x, y: x + y, [ eval('+'.join(l.rstrip('\n').split('\t')[2:]) ) for l in pysam.idxstats(bamfile) ])
     
-    time.sleep(1)
+    sleep(1)
     
     telomere_rc = 0
     if os.path.exists(telofile):
