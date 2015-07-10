@@ -45,7 +45,7 @@ def check_arguments():
 
 def count_telomeric_reads(bamfile, q):
     # generate Telomere reads file name  
-    #print("---- Processing BAM file: "+bamfile)
+    print("---- Processing BAM file: "+bamfile)
     telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
     
     # check if the file was already generated
@@ -71,6 +71,8 @@ def count_telomeric_reads(bamfile, q):
     # return results
     print([str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])
     result = '\t'.join([str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n'
+    print(result)
+    
     q.put(result)
     return(result)
 
@@ -133,7 +135,7 @@ def main():
         job.get()
 
     # now we are done, kill the listener
-    q.put('kill')
+    q.put("kill")
     
     pool.close()
     pool.join()
