@@ -69,7 +69,8 @@ def count_telomeric_reads(bamfile, q):
         print("Something went wrong with BAM file: "+bamfile)
         
     # return results
-    result = '\t'.join([str(bamfile.split("/")[-1].split("_")[0]),str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n'
+    print([str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])
+    result = '\t'.join([str(bamfile.split("/")[-1].split("_")[0]), str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n'
     q.put(result)
     return(result)
 
