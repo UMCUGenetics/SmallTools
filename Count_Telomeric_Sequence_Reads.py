@@ -4,8 +4,10 @@ import pysam
 import glob
 import os
 
+from time import time 
+from time import sleep
 import subprocess
-from multiprocessing import Pool
+import multiprocessing as mp
 
 from optparse import OptionParser
 # -------------------------------------------------
@@ -14,6 +16,7 @@ parser.add_option("--sambamba",	 dest="sambamba", help="Path to sambamba/samtool
 parser.add_option("--bamdir",	 dest="bamdir",   help="Path to directory containing BAM files", default=False)
 parser.add_option("--outdir",	 dest="outdir",   help="Path to directory to write output to", default="./telomeres/")
 parser.add_option("--repsize",   dest="repsize",  help="Number of required matching 6mers (TTAGGG)", default=10)
+parser.add_option("--t",         dest="nr_cpus",  help="Number of CPUs to use", default=8)
 
 (options, args) = parser.parse_args()
 # -------------------------------------------------
@@ -39,8 +42,7 @@ def check_arguments():
 
 # -------------------------------------------------
 
-def count_telomeric_reads(bamfile):
-
+def count_telomeric_reads(bamfile, q):
     # generate Telomere reads file name   
     telofile = bamfile.replace(options.bamdir,options.outdir).replace(".bam","_TelomericReads.sam")
     
@@ -59,15 +61,53 @@ def count_telomeric_reads(bamfile):
     telomere_rc = sum(1 for line in open(telofile,'r'))
     
     # return sample ID and count stats
-    return('\t'.join([bamfile.split("/")[-1].split("_")[0],str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n')
+    result = '\t'.join([bamfile.split("/")[-1].split("_")[0],str(total_rc), str(telomere_rc), str((telomere_rc/(total_rc*1.0))*100000.0)])+'\n'
+    q.put(result)
+    return(result)
+
     
 # -------------------------------------------------
-
-def run():
-    bamfiles = glob.glob(os.path.join(options.bamdir, "*.bam"))
-    pool = Pool(processes=len(bamfiles)) 
+def listener(q):
+    '''listens for messages on the q, writes to file. '''
+    #sys.stdout.write('Starting listener\n')
     
-    # check index for all bamfiles
+    f = open(os.path.join(options.outdir, "TelomereCounts.txt"), 'wb')
+    f.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
+    f.flush()
+    
+    while 1:
+        m = q.get()
+        if m == 'kill':
+            if not q.empty():
+                # received kill signal without finishing all the processes
+                sys.stdout.write('ERROR\n')
+                break
+            # received kill signal, finished all the processes, done
+            sys.stdout.write('DONE\n')
+            break
+        
+        f.write(m)
+        f.flush()
+    f.close()
+# -------------------------------------------------
+
+def main():
+    currtime = time()
+
+    #Init Manager queue
+    manager = mp.Manager()
+    q = manager.Queue()
+
+    # Init worker pool
+    pool = mp.Pool(int(options.nr_cpus))
+
+    #Init Listener
+    watcher = pool.apply_async(listener, (q,))
+
+    bamfiles = glob.glob(os.path.join(options.bamdir, "*.bam"))
+    jobs = []
+
+    #fire off workers
     for bamfile in bamfiles:
         
         baifile = bamfile+".bai"
@@ -75,20 +115,21 @@ def run():
         if not os.path.exists(baifile):
             print("No index file found for %s, indexing now"%(bamfile))
             subprocess.call(options.sambamba, " index " + bamfile)
-    
-    # generate Telomere reads file
-    counts = pool.map(count_telomeric_reads, bamfiles)
 
-    # open output file
-    output = open(os.path.join(options.outdir, "TelomereCounts.txt"),'w')
+        job = pool.apply_async(count_telomeric_reads, (bamfile, q))
+        jobs.append(job)        
 
-    # write header
-    output.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
-    # write results
-    for count in counts: 
-        output.write(count)
+            
+    for job in jobs:
+        job.get()
+
+    # now we are done, kill the listener
+    q.put('kill')
     
-    output.close()
+    pool.close()
+    pool.join()
+
+    print 'time elapsed:', time() - currtime
 
 # -------------------------------------------------
 
@@ -97,7 +138,9 @@ print("Starting Analysis")
 if __name__ == '__main__':
     # check specified options
     if check_arguments():
-        run()
+        main()
+    else:
+        print("Error in provided arguments")
 
 print("DONE")
 
