@@ -74,10 +74,10 @@ class LASTmapping:
 # ------------------------------------------------------------------------------------------------------------------------
 
 parser = OptionParser()
-parser.add_option("--bam",   dest="bam_file",	 help="Path of BAM file to parse",			default=False)
-parser.add_option("--last",  dest="last_file",	 help="Path of LAST file to parse",			default=False)
-parser.add_option("--reg",   dest="region_file", help="Regions of interest BED file",		default=False)
+parser.add_option("--bam",   dest="bam_file",	 help="Path of BAM file to parse",		default=False)
+parser.add_option("--last",  dest="last_file",	 help="Path of MAF file to parse",		default=False)
 parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=300)
+parser.add_option("--reg",   dest="region_file", help="Regions of interest BED file",		default=False)
 parser.add_option("--nral",  dest="nr_align",	 help="Number of alignments to display",	default=20)
 (options, args) = parser.parse_args()
 
@@ -94,7 +94,7 @@ def check_arguments(options):
 		return False
 
 	if not os.path.exists(options.last_file):
-		print("Invalid LAST file %s"%(options.last_file))
+		print("Invalid MAF file %s"%(options.last_file))
 		return False
 
 	return True
