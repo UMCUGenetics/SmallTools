@@ -69,6 +69,7 @@ parser = OptionParser()
 parser.add_option("--maf",   dest="maf_file",	 help="Path of input MAF file to parse",	default=False)
 parser.add_option("--out",   dest="out_file",	 help="Path of output MAF file to write",	default=False)
 parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=300)
+parser.add_option("--2d",    dest="twod_only",	 help="Flag to use 2D reads only",		default=True)
 (options, args) = parser.parse_args()
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -78,6 +79,8 @@ def check_arguments(options):
 	if not os.path.exists(options.maf_file):
 		print("Invalid MAF file %s"%(options.maf_file))
 		return False
+
+	print options.qual_score + 0
 
 	return True
 
@@ -101,11 +104,22 @@ def filter_alt_mappings(options):
 			aln = next(lines_gen).strip().split()
 			empty = next(lines_gen)
 
-			strand = 1
-			if aln[4] == '-':
-				strand = -1
-
+			# Store strand information +=1  -=-1
+			strand = int(aln[4]+'1')
+				
+			# Check if alignment passes QC
+			qcpass = False
+			
 			if (score >= options.qual_score):
+				# 2D reads always used 
+				if "_2D_" in aln[1]:
+					qcpass = True
+				# 1D reads only when specified
+				elif not options.twod_only:
+					qcpass = True
+			
+			# Store alignments that pass
+			if qcpass:
 				if (aln[1] not in collection):
 		          		collection[aln[1]] = []
 				collection[aln[1]].append(MAFmapping(score, ref, aln))
