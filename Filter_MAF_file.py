@@ -135,7 +135,7 @@ def filter_alt_mappings(options):
 		          		collection[aln[1]] = []
 				newmapping = MAFmapping(score, ref, aln)
 				collection[aln[1]].append(newmapping)
-				outf.write(newmapping.ref.to_bed())
+				outf.write(newmapping.ref.to_bed()+'\n')
 
 			#print "%i %s:%s-%s  -> %s:%s-%s" %(score, aln[1], aln[2], aln[3], ref[1], ref[2], ref[3])
 	outf.close()
