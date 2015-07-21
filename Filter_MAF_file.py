@@ -146,7 +146,7 @@ def write_alt_mappings(options, collection):
 	inf.close()
 	
 	for read in collection:
-		for aln in colleaction[read]:
+		for aln in collection[read]:
 			outf.write(aln.to_maf())
 	outf.close()
 	
