@@ -139,7 +139,7 @@ def write_alt_mappings(options, collection):
 	
 	inf = open(options.maf_file,'r')
 	for line in inf:
-		if isHeader(line):
+		if isHeaderLine(line):
 			outf.write(line)
 		else:
 			break
