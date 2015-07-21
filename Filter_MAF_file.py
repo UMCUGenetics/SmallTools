@@ -80,7 +80,10 @@ def check_arguments(options):
 		print("Invalid MAF file %s"%(options.maf_file))
 		return False
 
-	print options.qual_score + 0
+	#print options.qual_score + 0
+	if options.qual_score < 0 or not isinstance( options.qual_score, int ):
+		print("Invalid Quality Score cut-off %s"%(options.qual_score))
+		return False
 
 	return True
 
