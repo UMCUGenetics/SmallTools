@@ -33,7 +33,7 @@ class MAFregion:
 		else:
 			return int(self.loc)
 	def to_maf(self):
-		return "s %s\t\t%s %s %s %s %s"%(self.loc, self.pos, self.length, self.strand,"00000",self.seq)
+		return "s %s %s %s %s %s %s"%(self.loc, self.pos, self.length, self.strand,"00000",self.seq)
 
 class MAFmapping:
 	"""MAF mapping class"""
@@ -59,7 +59,7 @@ class MAFmapping:
 		return "%i %s -> %s" %(self.score, self.aln, self.ref)
 		
 	def to_maf(self):
-		return "a score=%s\n%s\n%s\n"%(self.score, self.ref.to_maf(), self.aln.to_maf())
+		return "a score=%s\n%s\n%s\n\n"%(self.score, self.ref.to_maf(), self.aln.to_maf())
 		
 
 
