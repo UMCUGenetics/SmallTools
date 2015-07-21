@@ -84,7 +84,11 @@ def check_arguments(options):
 	if options.qual_score < 0 or not isinstance( options.qual_score, int ):
 		print("Invalid Quality Score cut-off %s"%(options.qual_score))
 		return False
-
+	
+	print "-"*30
+	print "Running with the following optios:"
+	print options
+	print "-"*30
 	return True
 
 def isHeaderLine(line):
