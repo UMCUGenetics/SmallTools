@@ -26,7 +26,7 @@ class MAFregion:
 		return "%s:%i-%i %s" %(self.loc, self.pos, self.pos+self.length, self.strand)
 	
 	def to_bed(self):
-		return "%s\t%\t%i\t%s" %(self.loc, self.pos, self.pos+self.length, self.strand)
+		return "%s\t%i\t%i\t%s" %(self.loc, self.pos, self.pos+self.length, self.strand)
 
 	def get_loc(self):
 		if self.loc == 'X':
