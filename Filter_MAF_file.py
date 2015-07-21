@@ -134,7 +134,7 @@ def write_alt_mappings(options, collection):
 	for line in inf:
 		if isHeader(line):
 			outf.write(line)
-		else
+		else:
 			break
 	inf.close()
 	
