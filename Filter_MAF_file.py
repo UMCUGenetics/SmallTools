@@ -36,7 +36,7 @@ class MAFregion:
 		else:
 			return int(self.loc)
 	def to_maf(self):
-		return "s %s %s %s %s %s %s"%(self.loc, self.pos, self.length, self.strand,"00000",self.seq)
+		return "s %s %s %s %s %s %s"%(self.loc, self.pos, self.length, self.strand, self.totlen, self.seq)
 
 class MAFmapping:
 	"""MAF mapping class"""
