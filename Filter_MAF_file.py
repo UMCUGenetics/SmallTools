@@ -24,6 +24,9 @@ class MAFregion:
 
 	def __str__(self):
 		return "%s:%i-%i %s" %(self.loc, self.pos, self.pos+self.length, self.strand)
+	
+	def to_bed(self):
+		return "%s\t%\t%i\t%s" %(self.loc, self.pos, self.pos+self.length, self.strand)
 
 	def get_loc(self):
 		if self.loc == 'X':
@@ -95,6 +98,7 @@ def isHeaderLine(line):
 	return line.startswith("#")
 
 def filter_alt_mappings(options):
+	outf = open("regions.bed", 'w')
 	collection = {}
 	# Parse MAF file
 	with open(options.maf_file,'r') as f:
@@ -129,9 +133,12 @@ def filter_alt_mappings(options):
 			if qcpass:
 				if (aln[1] not in collection):
 		          		collection[aln[1]] = []
-				collection[aln[1]].append(MAFmapping(score, ref, aln))
+				newmapping = MAFmapping(score, ref, aln)
+				collection[aln[1]].append(newmapping)
+				outf.write(newmapping.ref.to_bed())
 
 			#print "%i %s:%s-%s  -> %s:%s-%s" %(score, aln[1], aln[2], aln[3], ref[1], ref[2], ref[3])
+	outf.close()
 	return collection
 
 def write_alt_mappings(options, collection):
