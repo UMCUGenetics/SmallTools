@@ -45,7 +45,7 @@ class MAFmapping:
 		self.score = score
 		self.ref = MAFregion(ref)
 		self.aln = MAFregion(aln)
-		self.qual = []
+		self.qual = ""
 
 	def __eq__(self, other):
 		return self.score == other.score
@@ -62,11 +62,11 @@ class MAFmapping:
 	def __str__(self):
 		return "%i %s -> %s" %(self.score, self.aln, self.ref)
 
-	def set_qual(self, qual):
-		self.qual = qual.split()[2]
+	def set_qual(self, quality):
+		self.qual = quality[2]
 		
 	def to_maf(self):
-		if self.qual != []:
+		if self.qual != "":
 			return "a score=%s\n%s\n%s\nq %s %s\n\n"%(self.score, self.ref.to_maf(), self.aln.to_maf(), self.aln.loc, self.qual)
 		else:
 			return "a score=%s\n%s\n%s\n\n"%(self.score, self.ref.to_maf(), self.aln.to_maf(), self.qual)
