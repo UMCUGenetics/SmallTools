@@ -166,7 +166,7 @@ def write_optimal_mappings(options, collection):
 			if mapping.score >= optimal.score:
 				optimal=mapping
 
-		outf.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc)
+		outf.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc+"\n")
 
 	outf.close()
 	#print collection
