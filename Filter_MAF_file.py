@@ -63,7 +63,7 @@ class MAFmapping:
 		return "%i %s -> %s" %(self.score, self.aln, self.ref)
 
 	def set_qual(self, qual):
-		self.qual = qual
+		self.qual = qual.split()[2]
 		
 	def to_maf(self):
 		if self.qual != []:
