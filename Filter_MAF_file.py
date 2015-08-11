@@ -169,7 +169,7 @@ def write_optimal_mappings(options, collection):
 		outf.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc)
 
 	outf.close()
-	print collection
+	#print collection
 	
 
 def write_alt_mappings(options, collection):
