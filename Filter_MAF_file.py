@@ -78,7 +78,7 @@ parser = OptionParser()
 parser.add_option("--maf",   dest="maf_file",	 help="Path of input MAF file to parse",	default=False)
 parser.add_option("--out",   dest="out_file",	 help="Path of output MAF file to write",	default=False)
 parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=300)
-parser.add_option("--2d",    dest="twod_only",	 help="Flag to use 2D reads only",			default=True)
+parser.add_option("--2d",    dest="twod_only",	 help="Flag to use 2D reads only",			default=False)
 parser.add_option("--bq",    dest="hasb_qual",	 help="Flag to indicate precens of base quality scores", default=True)
 (options, args) = parser.parse_args()
 
@@ -139,7 +139,7 @@ def filter_alt_mappings(options):
 			
 			if (score >= options.qual_score):
 				# 2D reads always used 
-				if "_2D_" in aln[1]:
+				if "_2D_000_2d" in aln[1]:
 					qcpass = True
 				# 1D reads only when specified
 				elif not options.twod_only:
@@ -154,27 +154,27 @@ def filter_alt_mappings(options):
 					newmapping.set_qual(qual)
 				collection[aln[1]].append(newmapping)
 				
-			#print "%i %s:%s-%s  -> %s:%s-%s" %(score, aln[1], aln[2], aln[3], ref[1], ref[2], ref[3])
 	return collection
 
-def write_optimal_mappings(options, collection):
-	outf = open("optimal_mappings.bed", 'w')
-	for read in collection:
-		optimal = collection[read][0]
 
-		for mapping in collection[read]:
-			if mapping.score >= optimal.score:
-				optimal=mapping
+#def find_optimal_path(options, collection):
+	# for each sequenced read
+#	for read in collection:
+		# go through mapping options
+#		for mapping in collection[read]:
 
-		outf.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc+"\n")
+	# KEEP TRACK OF UNMAPPED REGIONS
+	# ITERATE UNTIL X% MAPPED OR NO MORE ADDITIONS POSSIBLE
+	#
+	# RANGE ==
+	# 	mapping.aln.pos - mapping.aln.pos+mapping.aln.length
 
-	outf.close()
-	#print collection
 	
 
 def write_alt_mappings(options, collection):
 	outf = open(options.out_file, 'w')
-	
+	outf_optimal = open(options.out_file.replace(".maf",".optimal.maf"), 'w')
+
 	# Get header from original file and write to new MAF file
 	inf = open(options.maf_file,'r')
 	for line in inf:
@@ -186,15 +186,22 @@ def write_alt_mappings(options, collection):
 	
 	# Go through reads and write Mapping info
 	for read in collection:
+		optimal = collection[read][0]
+
 		for mapping in collection[read]:
 			outf.write(mapping.to_maf())
+			if mapping.score >= optimal.score:
+				optimal=mapping
+
+		outf_optimal.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc+"\n")
+
+	outf_optimal.close()
 	outf.close()
 	
 # ------------------------------------------------------------------------------------------------------------------------
 
 if check_arguments(options):
 	filtered_reads = filter_alt_mappings(options)
-	write_optimal_mappings(options, filtered_reads)
 	write_alt_mappings(options, filtered_reads)
 
 print("DONE")
