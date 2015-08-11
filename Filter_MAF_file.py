@@ -173,7 +173,6 @@ def filter_alt_mappings(options):
 
 def write_alt_mappings(options, collection):
 	outf = open(options.out_file, 'w')
-	outf_optimal = open(options.out_file.replace(".maf",".optimal.maf"), 'w')
 
 	# Get header from original file and write to new MAF file
 	inf = open(options.maf_file,'r')
@@ -189,13 +188,12 @@ def write_alt_mappings(options, collection):
 		optimal = collection[read][0]
 
 		for mapping in collection[read]:
-			outf.write(mapping.to_maf())
 			if mapping.score >= optimal.score:
 				optimal=mapping
 
-		outf_optimal.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc+"\n")
+		#outf_optimal.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc+"\n")
+		outf.write(optimal.to_maf())
 
-	outf_optimal.close()
 	outf.close()
 	
 # ------------------------------------------------------------------------------------------------------------------------
