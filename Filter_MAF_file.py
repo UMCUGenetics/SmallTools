@@ -45,6 +45,7 @@ class MAFmapping:
 		self.score = score
 		self.ref = MAFregion(ref)
 		self.aln = MAFregion(aln)
+		self.qual = []
 
 	def __eq__(self, other):
 		return self.score == other.score
@@ -60,10 +61,15 @@ class MAFmapping:
 	
 	def __str__(self):
 		return "%i %s -> %s" %(self.score, self.aln, self.ref)
+
+	def set_qual(self, qual):
+		self.qual = qual
 		
 	def to_maf(self):
-		return "a score=%s\n%s\n%s\n\n"%(self.score, self.ref.to_maf(), self.aln.to_maf())
-		
+		if self.qual != []:
+			return "a score=%s\n%s\n%s\nq %s %s\n\n"%(self.score, self.ref.to_maf(), self.aln.to_maf(), self.aln.loc, self.qual)
+		else:
+			return "a score=%s\n%s\n%s\n\n"%(self.score, self.ref.to_maf(), self.aln.to_maf(), self.qual)
 
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -72,7 +78,8 @@ parser = OptionParser()
 parser.add_option("--maf",   dest="maf_file",	 help="Path of input MAF file to parse",	default=False)
 parser.add_option("--out",   dest="out_file",	 help="Path of output MAF file to write",	default=False)
 parser.add_option("--qual",  dest="qual_score",  help="Minimum quality for alignments",		default=300)
-parser.add_option("--2d",    dest="twod_only",	 help="Flag to use 2D reads only",		default=True)
+parser.add_option("--2d",    dest="twod_only",	 help="Flag to use 2D reads only",			default=True)
+parser.add_option("--bq",    dest="hasb_qual",	 help="Flag to indicate precens of base quality scores", default=True)
 (options, args) = parser.parse_args()
 
 # ------------------------------------------------------------------------------------------------------------------------
@@ -98,7 +105,6 @@ def isHeaderLine(line):
 	return line.startswith("#")
 
 def filter_alt_mappings(options):
-	outf = open("regions.bed", 'w')
 	collection = {}
 	# Parse MAF file
 	with open(options.maf_file,'r') as f:
@@ -108,12 +114,22 @@ def filter_alt_mappings(options):
 			if len(line) <= 5:
 				continue
 
-			lines_gen = islice(f, 4)
+			lines_gen = False
+			qual = []
+
+			if options.hasb_qual:
+				lines_gen = islice(f, 5)
+
+			else:
+				lines_gen = islice(f, 4)
 
 			score = int(line.strip().split("=")[1])
 			ref = next(lines_gen).strip().split()
 			aln = next(lines_gen).strip().split()
+			if options.hasb_qual:
+				qual = next(lines_gen).strip().split()
 			empty = next(lines_gen)
+
 
 			# Store strand information +=1  -=-1
 			strand = int(aln[4]+'1')
@@ -134,16 +150,32 @@ def filter_alt_mappings(options):
 				if (aln[1] not in collection):
 		          		collection[aln[1]] = []
 				newmapping = MAFmapping(score, ref, aln)
+				if options.hasb_qual:
+					newmapping.set_qual(qual)
 				collection[aln[1]].append(newmapping)
-				outf.write(newmapping.ref.to_bed()+'\n')
-
+				
 			#print "%i %s:%s-%s  -> %s:%s-%s" %(score, aln[1], aln[2], aln[3], ref[1], ref[2], ref[3])
-	outf.close()
 	return collection
+
+def write_optimal_mappings(options, collection):
+	outf = open("optimal_mappings.bed", 'w')
+	for read in collection:
+		optimal = collection[read][0]
+
+		for mapping in collection[read]:
+			if mapping.score >= optimal.score:
+				optimal=mapping
+
+		outf.write(optimal.ref.to_bed()+"\t"+optimal.aln.loc)
+
+	outf.close()
+	print collection
+	
 
 def write_alt_mappings(options, collection):
 	outf = open(options.out_file, 'w')
 	
+	# Get header from original file and write to new MAF file
 	inf = open(options.maf_file,'r')
 	for line in inf:
 		if isHeaderLine(line):
@@ -152,15 +184,17 @@ def write_alt_mappings(options, collection):
 			break
 	inf.close()
 	
+	# Go through reads and write Mapping info
 	for read in collection:
-		for aln in collection[read]:
-			outf.write(aln.to_maf())
+		for mapping in collection[read]:
+			outf.write(mapping.to_maf())
 	outf.close()
 	
 # ------------------------------------------------------------------------------------------------------------------------
 
 if check_arguments(options):
 	filtered_reads = filter_alt_mappings(options)
+	write_optimal_mappings(options, filtered_reads)
 	write_alt_mappings(options, filtered_reads)
 
 print("DONE")
