@@ -26,41 +26,52 @@ parser.add_option("--out",   dest="out_file",	 help="Path to output VCF file",  
 
 def check_arguments(options):
 	#print("Checking arguments")
-	if not os.path.exists(options.vcf_file):
+	if not options.vcf_file or not os.path.exists(options.vcf_file):
 		print("Invalid VCF file %s"%(options.vcf_file))
 		return False
 	
 	# ---- SNV file ---
-	if not os.path.exists(options.cadd_snvs):
+	if not options.cadd_snvs or not os.path.exists(options.cadd_snvs):
 		print("Invalid CADD SNV file %s"%(options.cadd_snvs))
 		return False
+
 	if not os.path.exists(options.cadd_snvs+".tbi"):
 		print("No Index for CADD SNV file %s"%(options.cadd_snvs+".tbi"))
 		return False
 
 	# ---- InDel file ---
-	if not os.path.exists(options.cadd_indels):
+	if not options.cadd_indels or not os.path.exists(options.cadd_indels):
 		print("Invalid CADD InDel file %s"%(options.cadd_indels))
 		return False
+
 	if not os.path.exists(options.cadd_indels+".tbi"):
 		print("No Index for CADD InDel file %s"%(options.cadd_indels+".tbi"))
 		return False
 
 	# ---- Other settings ----
-	try int(options.nr_cpus):
-		pass
+	try:
+		int(options.nr_cpus)
+
 	except Exception, e:
 		print("Invalid nr of cpus defined %s"%(options.nr_cpus))
 		return False
 
 	return True
 
+
+# CHECK arguments
+if not check_arguments(options):
+		print("Error in provided arguments")
+		exit(0)
+
+# CREATE globals
 VCF_READER = vcf.Reader(open(options.vcf_file, 'r'))
 VCF_WRITER = vcf.Writer(open(options.out_file, 'w'), VCF_READER)
 VCF_WRITER.close()
 
-VALID_CHROMOSOMES = {"1":True,"2":True,"3":True,"4":True,"5":True,"6":True,"7":True,"8":True,"9":True,"10":True,"11":True,"12":True,"13":True,"14":True,"15":True,"16":True,"17":True,"18":True,"19":True,"20":True,"21":True,"22":True,"X":True,,"Y":True}
+VALID_CHROMOSOMES = {"1":True,"2":True,"3":True,"4":True,"5":True,"6":True,"7":True,"8":True,"9":True,"10":True,"11":True,"12":True,"13":True,"14":True,"15":True,"16":True,"17":True,"18":True,"19":True,"20":True,"21":True,"22":True,"X":True,"Y":True}
 
+# CADD extraction function
 def extract_CADD_score(arguments, q):
 	vcf_record, caddfile = arguments
 	
@@ -121,10 +132,6 @@ def listener(q):
 
 
 def main():
-	if not check_arguments(options):
-		print("Error in provided arguments")
-		exit(0)
-
 	currtime = time()
 
 	#Init Manager queue
