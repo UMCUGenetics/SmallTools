@@ -1,12 +1,15 @@
 Small tools for genetics research 
 ========
-
-See the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics)  
+Here I provide 'production' and development versions of the code I use in my reserach.
+I hope they are of use in your research or that they help solve other problems.  
+If you have suggestions or improvements let me know.  
+Tools are developed according to the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics) principles.
 
 ---
 ### Estimate telomere lengths in BAM files
 1. [Count_Telomeric_Sequence_Reads.py](https://github.com/jdeligt/Genetics/blob/master/Count_Telomeric_Sequence_Reads.py):  
    Extracts reads containing telomeric sequences from BAM files using [SAMBAMBA](http://lomereiter.github.io/sambamba/).
+   
    Number of telomeric 6-mers that need to matched can be set.
    Uses multiprocessing to distribute view/count commands over different processes.
    Stores matching telomeric reads in a SAM file for further processing.  
@@ -16,8 +19,8 @@ See the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics)
 ### Annotate a VCF with CADD scores
 1. [Annotate_CADD_Scores_In_VCF.py](https://github.com/jdeligt/Genetics/blob/master/Annotate_CADD_Scores_In_VCF.py):  
    Annoates variants in a VCF file with [CADD scores](http://cadd.gs.washington.edu/score) using the [precomputed](http://cadd.gs.washington.edu/download) files provided by  the University of Washington.  
+   
    Uses multiprocessing to distribute tabix lookup commands over different processes.  
   
 ---  
-Hope they help.  
-If you have suggestions or improvements let me know.  
+
