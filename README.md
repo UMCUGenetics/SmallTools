@@ -5,7 +5,7 @@ See the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics)
 
 ---
 ### Estimate telomere lengths in BAM files
-1. [Count_Telomeric_Sequence_Reads.py]https://github.com/jdeligt/Genetics/blob/master/Count_Telomeric_Sequence_Reads.py:  
+1. [Count_Telomeric_Sequence_Reads.py](https://github.com/jdeligt/Genetics/blob/master/Count_Telomeric_Sequence_Reads.py):  
    Extracts reads containing telomeric sequences from BAM files using [SAMBAMBA](http://lomereiter.github.io/sambamba/).
    Number of telomeric 6-mers that need to matched can be set.
    Uses multiprocessing to distribute view/count commands over different processes.
