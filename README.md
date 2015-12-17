@@ -5,7 +5,7 @@ See the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics)
 
 ---
 ### Estimate telomere lengths in BAM files
-1. Count_Telomeric_Sequence_Reads.py:  
+1. [Count_Telomeric_Sequence_Reads.py]https://github.com/jdeligt/Genetics/blob/master/Count_Telomeric_Sequence_Reads.py:  
    Extracts reads containing telomeric sequences from BAM files using [SAMBAMBA](http://lomereiter.github.io/sambamba/).
    Number of telomeric 6-mers that need to matched can be set.
    Uses multiprocessing to distribute view/count commands over different processes.
@@ -14,7 +14,7 @@ See the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics)
   
 ---
 ### Annotate a VCF with CADD scores
-1. Annotate_CADD_Scores_In_VCF.py:  
+1. [Annotate_CADD_Scores_In_VCF.py](https://github.com/jdeligt/Genetics/blob/master/Annotate_CADD_Scores_In_VCF.py):  
    Annoates variants in a VCF file with [CADD scores](http://cadd.gs.washington.edu/score) using the [precomputed](http://cadd.gs.washington.edu/download) files provided by  the University of Washington.  
    Uses multiprocessing to distribute tabix lookup commands over different processes.  
   
