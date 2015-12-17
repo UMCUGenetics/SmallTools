@@ -92,7 +92,7 @@ os.system("mv *_CNVs.filtered.txt results/")
 
 
 
-# Log for generation of reference map and some usefull use-cases
+# Log for generation of reference map 
 """
 cat *_BULK_CNVs.txt > ALL_Controls_CNVs.bed
 cat *_BLOOD_CNVs.txt >> ALL_Controls_CNVs.bed
@@ -112,25 +112,5 @@ cat overlaps2.counts.counts | awk '{if ($4>=2) print}' > ALL_Controls_CNVs_multi
 
 # bedtools merge -i ALL_Controls_CNVs_multisample.bed -c 1 -o count > ALL_Controls_multisample_merged_CNVs.bed
 # cat overlapmap/ALL_Controls_CNVs_multisample.bed | sort -k1,1 -k2,2n > UnmatchedControl_CNV_Regions.bed
-
-bedtools intersect -a STE0071_C21_CNVs.txt -b overlapmap/ALL_Controls_multisample_merged_CNVs.bed -v | bedtools intersect -a stdin -b STE0071_BLOOD_CNVs.txt -v | awk '{if(($3-$2)>50000) print}'
-
-
-
-cat STE0071_BLOOD_ratio.txt | awk '{if($1==1 && $2>=168300000 && $2 <= 168350000) print}'
-cat STE0071_*_ratio.txt | awk '{if($1==1 && $2>=168300000 && $2<=168350000) print}'
-
-cat STE0071_*_ratio.txt | awk '{if($1==1 && $2==168315001) print}'
-cat *_ratio.txt | awk '{if($1==1 && $2==168315001) print}'
-
-
-bedtools intersect -a STE0071_C21_CNVs.txt -b overlapmap/ALL_Controls_multisample_merged_CNVs.bed -v | bedtools intersect -a stdin -b STE0071_BLOOD_CNVs.txt -v | awk '{if(($3-$2)>50000) print}'
-bedtools intersect -a STE0097_C_CNVs.txt -b overlapmap/ALL_Controls_multisample_merged_CNVs.bed -v | bedtools intersect -a stdin -b STE0097_BLOOD_CNVs.txt -v | awk '{if(($3-$2)>50000) print}'
-bedtools intersect -a C30913D_SC109_CNVs.txt -b overlapmap/ALL_Controls_multisample_merged_CNVs.bed -v | bedtools intersect -a stdin -b C30913D_BULK_CNVs.txt -v | awk '{if(($3-$2)>50000) print}'
-bedtools intersect -a STE0099_C_CNVs.txt -b overlapmap/ALL_Controls_multisample_merged_CNVs.bed -v | bedtools intersect -a stdin -b STE0099_BLOOD_CNVs.txt -v | awk '{if(($3-$2)>50000) print}'
-bedtools intersect -a STE0100_C_CNVs.txt -b overlapmap/ALL_Controls_multisample_merged_CNVs.bed -v | bedtools intersect -a stdin -b STE0100_BLOOD_CNVs.txt -v | awk '{if(($3-$2)>50000) print}'
-
-
-cat STE0100_C_ratio.txt | awk '{if($1==7 && $2>=62560000 && $2<=62570000) print}'
 
 """
