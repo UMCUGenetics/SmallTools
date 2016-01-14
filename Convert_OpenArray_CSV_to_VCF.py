@@ -168,7 +168,7 @@ def Main():
 	for sample in csv_data:
 		outfile = open(os.path.join(options.out_dir,sample+"_OpenArrayCalls"+".vcf"),'w')
 
-		outfile.write('\n'.join(vcf_headers))
+		outfile.write('\n'.join(vcf_headers)+'\n')
 		outfile.write('\n#'.join(csv_headers))
 
 		tmp_vcf_cols = copy.copy(vcf_cols)
