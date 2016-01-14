@@ -70,7 +70,8 @@ def ReadFileById(filename, ftype):
 		key = 'ID'
 		head = '##'
 
-	with open(filename, 'r') as f:
+	# Open in unversial mode to enable windows line endings
+	with open(filename, 'rU') as f:
 		reader = csv.reader((f), delimiter=delim)
 
 		# read header lines
@@ -84,6 +85,8 @@ def ReadFileById(filename, ftype):
 		while len(row) <= 1:
 			row = reader.next()	
 
+		# fix column headers
+		row = [heading.replace(" ","_") for heading in row]
 		# store column names
 		colnames = row
 
