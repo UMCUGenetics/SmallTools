@@ -103,7 +103,7 @@ def ReadFileById(filename, ftype):
 			if ftype is 'csv':
 				sample_id = dicto['Sample_ID']
 
-			sample_id = sample_id.replace("_","-").replace("/","-").replace("\\","-")
+			sample_id = sample_id.replace(" ","").replace("_","-").replace("/","-").replace("\\","-")
 			sample_id = sample_id.replace("---","-").replace("--","-")
 
 			if ftype is 'csv':
