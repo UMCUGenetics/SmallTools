@@ -176,7 +176,8 @@ def Main():
 		outfile.write('\t'.join(tmp_vcf_cols)+'\n')
 
 		template = vcf_data['TEST']
-
+	
+		# TODO order output by genomic position
 		for position in template:
 			this_vcf = []
 			for col in vcf_cols:
