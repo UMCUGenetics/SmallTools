@@ -35,6 +35,10 @@ def check_arguments():
             print("Invalid / unable to create, output folder %s"%(options.outdir))
             return False
     
+    options.repsize     = int(options.repsize)
+    options.nr_samples  = int(options.nr_samples)
+    options.nr_cpus     = int(options.nr_cpus)
+    
     print("Running with the following settings:")
     print("------------------------------------")
     print(options)
