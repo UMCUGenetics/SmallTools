@@ -50,14 +50,14 @@ rm(calls)
 rm(genot)
 # -------------------------------------------------------------
 
-# Determine SAMPLE GROUPING
 # TODO
+# Determine SAMPLE GROUPING
 # groupcols <- unlist(lapply(samplenames, function(x) sampledetails$Col[sampledetails$ID==x]))
 
 # -------------------------------------------------------------
 # PLOT
 
-make_heatmap <- function(data, clusteringflag) {
+make_heatmap <- function(data, clusteringflag, groupcols) {
   rowflag=FALSE
   colflag=FALSE
   if (clusteringflag=="row") {
@@ -72,22 +72,22 @@ make_heatmap <- function(data, clusteringflag) {
   }
 
 
-  heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
-  #heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram="none", Rowv=F, Colv=F, symkey=F,  RowSideColors=groupcols, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(inform_genot), rowsep=1:nrow(inform_genot), keysize=0.5)
-  #legend("topright", legend=unique(sampledetails$Individual), col=unique(sampledetails$Col), pch=20, ncol=length(unique(sampledetails$Individual)), bty="n", inset=c(0.01,-0.01))
+  heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F,                           sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
+  if (! is.na(groupcols)) {
+  heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F,  RowSideColors=groupcols, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
   return(heatmappy)
 }
 
 pdf(file=paste(project, panel,"genotyping_GATK.pdf", sep="_"), width=30, height=15, pointsize=15)
   # No clustering
-  make_heatmap(num_gentyp, "none")
+  make_heatmap(num_gentyp, "none", NA)
 
   # Clustering
-  make_heatmap(num_gentyp, "row")
+  make_heatmap(num_gentyp, "row", NA)
 
   # WITH GROUPING
-  #heatmap.2(genot, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram="row", Colv=F, symkey=F, RowSideColors=groupcols, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(inform_genot), rowsep=1:nrow(inform_genot), keysize=0.5)
-  #legend("topright", legend=unique(sampledetails$Individual), pch=20, ncol=length(unique(sampledetails$Individual)), bty="n")
+  #make_heatmap(num_gentyp, "row", groupcols)
+  #legend("topright", legend=unique(sampledetails$Individual), col=unique(sampledetails$Col), pch=20, ncol=length(unique(sampledetails$Individual)), bty="n", inset=c(0.01,-0.01))
 
 dev.off()
 
