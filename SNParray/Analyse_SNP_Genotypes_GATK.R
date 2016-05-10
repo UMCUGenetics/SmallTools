@@ -52,6 +52,8 @@ rm(genot)
 
 # TODO
 # Determine SAMPLE GROUPING
+# Sample in header 
+# Directory for vcfs
 # groupcols <- unlist(lapply(samplenames, function(x) sampledetails$Col[sampledetails$ID==x]))
 
 # -------------------------------------------------------------
