@@ -66,6 +66,10 @@ make_heatmap <- function(data, clusteringflag) {
   if (clusteringflag=="col") {
     colflag=TRUE
   }
+  if (clusteringflag=="both") {
+    rowflag=TRUE
+    colflag=TRUE
+  }
 
 
   heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
