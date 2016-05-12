@@ -164,6 +164,13 @@ def Main():
 	csv_headers, csv_cols, csv_data = ReadFileById(options.csv_file, 'csv')
 	vcf_headers, vcf_cols, vcf_data = ReadFileById(options.design_vcf, 'vcf')
 
+	template = vcf_data['TEST']
+	chrvalues = {'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'11':11,'12':12,'13':13,'14':14,'15':15,'16':16,'17':17,'18':18,'19':19,'20':20,'21':21,'22':22,'X':23,'Y':24}
+	dicts = template.items()
+	dicts.sort(key=lambda (k,d): (chrvalues[(d['#CHROM'])], int(d['POS']),))
+	ordered_ids = [x[0] for x in dicts]
+
+
 	# Write VCF for each Experiment in Open Array result set
 	for sample in csv_data:
 		outfile = open(os.path.join(options.out_dir,sample+"_OpenArrayCalls"+".vcf"),'w')
@@ -175,10 +182,7 @@ def Main():
 		tmp_vcf_cols[-1] = sample
 		outfile.write('\t'.join(tmp_vcf_cols)+'\n')
 
-		template = vcf_data['TEST']
-	
-		# TODO order output by genomic position
-		for position in template:
+		for position in ordered_ids:
 			this_vcf = []
 			for col in vcf_cols:
 				this_vcf.append(template[position][col])
