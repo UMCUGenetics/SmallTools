@@ -2,6 +2,8 @@ library("VariantAnnotation")
 library("RColorBrewer")
 library("ggplot2")
 library("gplots")
+# -------------------------------------------------------------
+vcfdir <- "~/data/24SNPs/VCFbased/vcfs"
 
 # -------------------------------------------------------------
 myColors <- c("blue","green","red","white")
@@ -15,7 +17,7 @@ matrixcols2 <-  colorRampPalette(c("#377eb8","#4daf4a","#e41a1c"))
 
 project <- "OpenArrayTest"
 panel <- "taqman"
-vcffiles <- list.files("vcfs", full.names=T, pattern=".vcf$")
+vcffiles <- list.files(vcfdir, full.names=T, pattern=".vcf$")
 
 # -------------------------------------------------------------
 
@@ -25,22 +27,45 @@ samplenames <- unlist(lapply(calls, function(x) samples(header(x)) ))
 print(length(vcffiles))
 print(length(samplenames))
 
-print(vcffiles)
-print(samplenames)
+template <- readVcf("taqman_design.vcf", "hg19")
+nrpositions <- nrow(geno(template)$GT)
+snpnames <- names(ranges(template))
+rm(template)
 
-nrpositions <- nrow(geno(calls[[1]])$GT)
-snpnames <- names(ranges(calls[[1]]))
+template <- data.frame(read.table("taqman_design.vcf", sep='\t', header=F))
+colnames(template) <- c("Chr","Pos","rsID","Ref","Alt","Qual","Info","Format","Test")
+template$Merge <- paste0(as.character(template$Chr),":",template$Pos)
+rownames(template) <- snpnames
 
-genot <- data.frame(  matrix(vector(), length(vcffiles), nrpositions, dimnames=list(samplenames, snpnames))  )
 
-i<-0
+# -------------------------------------------------------------
+
+genot <- data.frame(  matrix(vector(), length(vcffiles), nrpositions, dimnames=list(samplenames, snpnames)) )
+
+
 for (s in calls) {
-  i<-i+1
-  genot[i,] <- unlist(geno(s)$GT)
+  samplename <- samples(header(s))
+  nddf <- data.frame(genotype=unlist(geno(s)$GT))
+  colnames(nddf) <- samplename
+  
+  snps <- names(ranges(s))
+  if (grepl("_" ,snps[1])) {
+    snpdf <- data.frame(Merge=gsub("_.*","",snps)) 
+    snpdf <- merge(template, snpdf, by="Merge")
+    rownames(snpdf) <- snpdf$Merge
+    snps<-as.character(snpdf[gsub("_.*","",snps),]$rsID)
+  } 
+  rownames(nddf) <- snps
+  genot[samplename,snps] <- nddf[,1]
 }
+colnames(genot) <- template[colnames(genot),]$Merge
+
+# -------------------------------------------------------------
+
 num_gentyp <- apply(genot, 2, function(x) myValues[x])
 rownames(num_gentyp) <- samplenames
 colnames(num_gentyp) <- snpnames
+
 
 
 write.table(genot, file=paste(project,panel,"Genotypes.txt",sep="_"), sep='\t', quote=F)
