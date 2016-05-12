@@ -58,13 +58,12 @@ for (s in calls) {
   rownames(nddf) <- snps
   genot[samplename,snps] <- nddf[,1]
 }
-colnames(genot) <- template[colnames(genot),]$Merge
 
 # -------------------------------------------------------------
 
 num_gentyp <- apply(genot, 2, function(x) myValues[x])
 rownames(num_gentyp) <- samplenames
-colnames(num_gentyp) <- snpnames
+colnames(num_gentyp) <- template[snpnames,]$Merge
 
 
 
@@ -99,19 +98,30 @@ make_heatmap <- function(data, clusteringflag, groupcols) {
   }
 
 
-  heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F,                           sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
-  if (! is.na(groupcols)) {
-  heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F,  RowSideColors=groupcols, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
-  }
+  heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=.3, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F,                           sepwidth=c(0.002,0.002), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
+  #if (! is.na(groupcols)) {
+  #heatmappy <- heatmap.2(data, trace="none", scale="none", margins=c(10, 10), col=matrixcols2, cexCol=1.2, cexRow=1.4, dendrogram=clusteringflag, Rowv=rowflag, Colv=colflag, symkey=F,  RowSideColors=groupcols, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(data), rowsep=1:nrow(data), keysize=0.5)
+  #}
   return(heatmappy)
 }
 
-pdf(file=paste(project, panel,"genotyping_GATK.pdf", sep="_"), width=30, height=15, pointsize=15)
-  # No clustering
-  make_heatmap(num_gentyp, "none", NA)
+pdf(file=paste(project, panel,"genotyping_GATK.pdf", sep="_"), width=15, height=8, pointsize=10)
 
+  dd <- dist(num_gentyp, method="euclidean")
+  hc <- hclust(dd, method="ward.D2")
+  hcd <- as.dendrogram(hc)
+  
+  # Dendrogram
+  par(mar=c(2,2,2,8))
+  nodePar <- list(lab.cex=0.4, pch=c(NA, NA), cex=0.7, col="blue")
+  plot(hcd,  xlab="Height", horiz=TRUE, nodePar=nodePar)
+  
   # Clustering
   make_heatmap(num_gentyp, "row", NA)
+  
+  #No clustering
+  make_heatmap(num_gentyp, "none", NA)
+  
 
   # WITH GROUPING
   #make_heatmap(num_gentyp, "row", groupcols)
