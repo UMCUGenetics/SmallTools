@@ -122,7 +122,6 @@ pdf(file=paste(project, panel,"genotyping_GATK.pdf", sep="_"), width=15, height=
   #No clustering
   make_heatmap(num_gentyp, "none", NA)
   
-
   # WITH GROUPING
   #make_heatmap(num_gentyp, "row", groupcols)
   #legend("topright", legend=unique(sampledetails$Individual), col=unique(sampledetails$Col), pch=20, ncol=length(unique(sampledetails$Individual)), bty="n", inset=c(0.01,-0.01))
