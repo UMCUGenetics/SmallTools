@@ -147,6 +147,7 @@ def DetermineGenotype(vcf, entry):
 		else:
 			geno = "0/1"
 
+	# REFs don't match, check ALT
 	else:
 		if alt is ref:
 			geno = "1/1"
@@ -155,9 +156,10 @@ def DetermineGenotype(vcf, entry):
 			alto = ref
 		else:
 			print("[WARNING] incompatible calls with TEMPLATE VCF")
-			print(ref,alt,vcf)
+			print(ref, alt, vcf)
 
-
+	# DEFAULT GENOTYPE QUALITY IS 60
+	# FIXME DTERMINE QUALITY FROM CSV (NOT TRIVIAL)
 	return [alto, geno+":60"]
 
 # --------------------------------------------------------
@@ -167,18 +169,23 @@ def Main():
 		print("Error in provided arguments")
 		exit(0)
 
+
+	chrvalues = {'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'11':11,'12':12,'13':13,'14':14,'15':15,'16':16,'17':17,'18':18,'19':19,'20':20,'21':21,'22':22,'X':23,'Y':24}
+
+
 	# read CSV
 	csv_headers, csv_cols, csv_data = ReadFileById(options.csv_file, 'csv')
 
 	# read TEMPLATE VCF
 	vcf_headers, vcf_cols, vcf_data = ReadFileById(options.design_vcf, 'vcf')
 
+	# load TEMPLATE
 	template = vcf_data['TEST']
-	chrvalues = {'1':1,'2':2,'3':3,'4':4,'5':5,'6':6,'7':7,'8':8,'9':9,'10':10,'11':11,'12':12,'13':13,'14':14,'15':15,'16':16,'17':17,'18':18,'19':19,'20':20,'21':21,'22':22,'X':23,'Y':24}
 	dicts = template.items()
+
+	# force correct ORDERING
 	dicts.sort(key=lambda (k,d): (chrvalues[(d['#CHROM'])], int(d['POS']),))
 	ordered_ids = [x[0] for x in dicts]
-
 
 	# Write VCF for each Experiment in Open Array result set
 	for sample in csv_data:
@@ -202,11 +209,6 @@ def Main():
 			outfile.write('\t'.join(this_vcf)+'\n')
 
 		outfile.close()
-
-	#print csv_data
-	#print "-"*100
-	#print vcf_data
-	#print "-"*100
 
 if __name__ == "__main__":
 	Main()
