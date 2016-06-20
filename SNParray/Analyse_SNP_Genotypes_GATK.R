@@ -78,7 +78,8 @@ write.table(genot, file=paste(project,panel,"Genotypes.txt",sep="_"), sep='\t', 
 write.table(num_gentyp, file=paste(project,panel,"NumGenotypes.txt",sep="_"), sep='\t', quote=F)
 
 # -------------------------------------------------------------
-# PER SAMPLE
+# REMOVE NOISY SAMPLES
+# FIXME ADD LOW QC TO OUTPUT
 NAcount <- rowSums(is.na(num_gentyp))
 remove <- names(NAcount[NAcount>=15])
 clean_num_gentyp <- num_gentyp[!rownames(num_gentyp) %in% remove, ]
@@ -87,7 +88,7 @@ TAD.dist    <- dist(clean_num_gentyp, method="manhattan", diag=FALSE, upper=FALS
 TAD.cluster <- hclust(TAD.dist, method="average", members=NULL)
 grouping <- cutree(TAD.cluster, h=5)
 
-temper <- data.frame(cbind(clean_num_gentyp[,SNPorder], grouping))
+temper <- data.frame(cbind(clean_num_gentyp, grouping))
 temper$Class <- "identified"
 
 pdf(file=paste0(today,"_Genotyping_newpanel_perGroup.pdf"), width=30, height=15, pointsize=15)
@@ -99,7 +100,7 @@ for (i in c(1:max(grouping))) {
     rows <- rownames(clean_num_gentyp)[grouping%in%c(i-1,i,i+1)]
     plotname <- paste0(i-1,"-",i+1)
   }
-  dat <- clean_num_gentyp[rows,SNPorder]
+  dat <- clean_num_gentyp[rows,]
 
   heatmap.2(as.matrix(dat), trace="none", scale="none", main=plotname, margins=c(10, 25), col=matrixcols3, cexCol=1.2, cexRow=1.2, dendrogram="row", Colv=F, symkey=T, sepwidth=c(0.02,0.02), sepcolor="lightgray", colsep=1:ncol(dat), rowsep=1:nrow(dat), keysize=0.5)
 
@@ -110,15 +111,16 @@ dev.off()
 write.table(temper, paste0(today,"_Grouped_Calls_",panel,".txt"), sep='\t', row.names=T, quote=F)
 rm(genot)
 # -------------------------------------------------------------
-# -------------------------------------------------------------
 
+# -------------------------------------------------------------
 # TODO
-# CHECK GROUPING BASED ON PROVIDED PAIRS
+# ADD GROUPING CHECK BASED ON PROVIDED PAIRS
+# STUB
 # groupcols <- unlist(lapply(samplenames, function(x) sampledetails$Col[sampledetails$ID==x]))
+# -------------------------------------------------------------
 
 # -------------------------------------------------------------
 # PLOT
-
 make_heatmap <- function(data, clusteringflag, groupcols) {
   rowflag=FALSE
   colflag=FALSE
