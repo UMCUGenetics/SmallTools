@@ -22,12 +22,12 @@ parser.add_option("--des",	dest="design_vcf", help="Path to design template VCF,
 
 # ---------------------- CSV FORMAT ----------------------
 # Sample_ID,Plate_Barcode,Gene_Symbol,NCBI_SNP_Reference,Assay_Name_or_ID,Allele_1_Call,Allele_2_Call
-# A1_HUB-02-B2-032_2,THF94,NULL,rs4855056,C_11821218_10,NOAMP,NOAMP
+# SampleX,THF94,NULL,rs4855056,C_11821218_10,NOAMP,NOAMP
 
 # ----------------------VCF FORMAT ----------------------
 # ##fileformat=VCFv4.1
 # #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TEST
-# 1	59569829	.	C	T	225	.	DP=133;VDB=0.0504;AF1=0.5;AC1=1;DP4=20,37,21,47;MQ=59;FQ=225;PV4=0.7,1,1,1	GT:PL:DP:GQ	
+# 1	59569829	.	C	T	225	.	DP=133;VDB=0.0504;AF1=0.5;AC1=1;DP4=20,37,21,47;MQ=59;FQ=225;PV4=0.7,1,1,1	GT:PL:DP:GQ
 
 
 # --------------------------------------------------------
@@ -37,7 +37,7 @@ def CheckArguments(options):
 	if not options.csv_file or not os.path.exists(options.csv_file):
 		print("Invalid VCF file %s"%(options.csv_file))
 		return False
-	
+
 	# ---- SNV file ---
 	if not options.out_dir or not os.path.exists(options.out_dir):
 		print("Invalid OUTPUT directory %s"%(options.out_dir))
@@ -51,20 +51,20 @@ def CheckArguments(options):
 
 def IsHeader(row, head):
 	return ' '.join(row).startswith(head)
-	
+
 # --------------------------------------------------------
 
 def ReadFileById(filename, ftype):
 	headers = []
 	data = {}
-	
+
 	delim, key, head = False, False, False
-	
+
 	if ftype is 'csv':
 		delim = ','
 		key = 'NCBI_SNP_Reference'
 		head = ' #'
-	
+
 	if ftype is 'vcf':
 		delim = '\t'
 		key = 'ID'
@@ -80,10 +80,10 @@ def ReadFileById(filename, ftype):
 		while IsHeader(row, head):
 			headers.append(delim.join(row))
 			row = reader.next()
-		
+
 		# read empty lines
 		while len(row) <= 1:
-			row = reader.next()	
+			row = reader.next()
 
 		# fix column headers
 		row = [heading.replace(" ","_") for heading in row]
@@ -111,7 +111,7 @@ def ReadFileById(filename, ftype):
 
 			if sample_id not in data:
 				data[sample_id] = {}
-			
+
 			data[sample_id][dicto[key]] = dicto
 
 	return [headers, colnames, data]
@@ -127,14 +127,14 @@ def DetermineGenotype(vcf, entry):
 	geno = False
 	alto = alt
 
-	# return FAILED	
+	# return FAILED
 	if ref in failed or alt is failed:
 		geno = "./.:0"
 		alto = vcf["ALT"]
 		return [alto, geno]
 
 
-	# IF ref call matches VCF ref		
+	# IF ref call matches VCF ref
 	if ref is vcf["REF"]:
 		if alt is ref:
 			geno = "0/0"
@@ -189,7 +189,7 @@ def Main():
 
 			# ALT        FORMAT [GT:GQ]
 			this_vcf[4], this_vcf[-1] = DetermineGenotype(template[position], csv_data[sample][position])
-			
+
 			outfile.write('\t'.join(this_vcf)+'\n')
 
 		outfile.close()
@@ -201,4 +201,3 @@ def Main():
 
 if __name__ == "__main__":
 	Main()
-
