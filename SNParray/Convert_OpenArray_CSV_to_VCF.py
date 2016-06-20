@@ -4,9 +4,8 @@ import csv
 import copy
 
 from optparse import OptionParser
-
 # --------------------------------------------------------
-# Joep de Ligt
+# Joep de Ligt UMCUtrecht
 # Build for Python 2.7
 # Parse ThermoFisher Open Array CSV file to per sample VCF
 # --------------------------------------------------------
@@ -191,9 +190,12 @@ def Main():
 	for sample in csv_data:
 		outfile = open(os.path.join(options.out_dir,sample+"_OpenArrayCalls"+".vcf"),'w')
 
+		# write VCF HEADERS
 		outfile.write('\n'.join(vcf_headers)+'\n')
+		# write CSV HEADERS
 		outfile.write('\n#'.join(csv_headers))
 
+		# make sure we son't overwrite the template
 		tmp_vcf_cols = copy.copy(vcf_cols)
 		tmp_vcf_cols[-1] = sample
 		outfile.write('\t'.join(tmp_vcf_cols)+'\n')
