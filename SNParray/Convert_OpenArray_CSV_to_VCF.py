@@ -26,23 +26,24 @@ parser.add_option("--des",	dest="design_vcf", help="Path to design template VCF,
 
 # ----------------------VCF FORMAT ----------------------
 # ##fileformat=VCFv4.1
-# #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	TEST
-# 1	59569829	.	C	T	225	.	DP=133;VDB=0.0504;AF1=0.5;AC1=1;DP4=20,37,21,47;MQ=59;FQ=225;PV4=0.7,1,1,1	GT:PL:DP:GQ
-
+# #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	SampleX
+# 1	59569829	.	C	T	225	.	DP=133;VDB=0.0504;AF1=0.5;AC1=1;DP4=20,37,21,47;MQ=59;FQ=225;PV4=0.7,1,1,1	GT:PL:DP:GQ	0/0:0:0:0
 
 # --------------------------------------------------------
 
 def CheckArguments(options):
-	#print("Checking arguments")
+
+	# ---- CSV file ---
 	if not options.csv_file or not os.path.exists(options.csv_file):
 		print("Invalid VCF file %s"%(options.csv_file))
 		return False
 
-	# ---- SNV file ---
+	# ---- OUTPUT directory ---
 	if not options.out_dir or not os.path.exists(options.out_dir):
 		print("Invalid OUTPUT directory %s"%(options.out_dir))
 		return False
 
+	# ---- DESIGN VCF file ---
 	if not options.design_vcf or not os.path.exists(options.design_vcf):
 		print("Invalid DESIGN VCF file %s"%(options.design_vcf))
 		return False
@@ -53,11 +54,12 @@ def IsHeader(row, head):
 	return ' '.join(row).startswith(head)
 
 # --------------------------------------------------------
-
+# UNIVERSIAL FILE READER for CSVs and VCFs
 def ReadFileById(filename, ftype):
 	headers = []
 	data = {}
 
+	# SET defaults
 	delim, key, head = False, False, False
 
 	if ftype is 'csv':
@@ -85,13 +87,13 @@ def ReadFileById(filename, ftype):
 		while len(row) <= 1:
 			row = reader.next()
 
-		# fix column headers
+		# remove spaces from column headers
 		row = [heading.replace(" ","_") for heading in row]
 		# store column names
 		colnames = row
 
-
 		for row in reader:
+			# skip empty lines
 			if len(row) <= 1:
 				continue
 
@@ -99,13 +101,17 @@ def ReadFileById(filename, ftype):
 
 			sample_id = False
 			if ftype is 'vcf':
+				# SAMPLE ID is the last field
 				sample_id = colnames[-1]
 			if ftype is 'csv':
+				# SAMPLE ID can be retrieved by header
 				sample_id = dicto['Sample_ID']
 
+			# clean up SAMPLE ID
 			sample_id = sample_id.replace(" ","").replace("_","-").replace("/","-").replace("\\","-")
 			sample_id = sample_id.replace("---","-").replace("--","-")
 
+			# add PLATE ID to SAMPLE ID for taqman assays
 			if ftype is 'csv':
 				sample_id = sample_id+"_"+dicto['Plate_Barcode']
 
@@ -117,10 +123,11 @@ def ReadFileById(filename, ftype):
 	return [headers, colnames, data]
 
 # --------------------------------------------------------
-
+# fill VCF template with data from CSV entry
 def DetermineGenotype(vcf, entry):
 	# FAILED indicators
 	failed = ["UND","NOAMP"]
+
 	# REF / ALT determination
 	ref = entry["Allele_1_Call"]
 	alt = entry["Allele_2_Call"]
@@ -132,7 +139,6 @@ def DetermineGenotype(vcf, entry):
 		geno = "./.:0"
 		alto = vcf["ALT"]
 		return [alto, geno]
-
 
 	# IF ref call matches VCF ref
 	if ref is vcf["REF"]:
@@ -148,7 +154,7 @@ def DetermineGenotype(vcf, entry):
 			geno = "0/1"
 			alto = ref
 		else:
-			print("[WARNING] incompatible calls with TEMPLATE vcf")
+			print("[WARNING] incompatible calls with TEMPLATE VCF")
 			print(ref,alt,vcf)
 
 
@@ -161,7 +167,10 @@ def Main():
 		print("Error in provided arguments")
 		exit(0)
 
+	# read CSV
 	csv_headers, csv_cols, csv_data = ReadFileById(options.csv_file, 'csv')
+
+	# read TEMPLATE VCF
 	vcf_headers, vcf_cols, vcf_data = ReadFileById(options.design_vcf, 'vcf')
 
 	template = vcf_data['TEST']
