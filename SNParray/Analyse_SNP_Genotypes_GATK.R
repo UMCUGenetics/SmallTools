@@ -16,6 +16,7 @@ myValues <- c(-1,0,1,NA)
 names(myValues) <- c("0/0","0/1","1/1",".")
 
 matrixcols2 <-  colorRampPalette(c("#377eb8","#4daf4a","#e41a1c"))
+matrixcols3 <-  colorRampPalette(c("#377eb8","#4daf4a","#e41a1c"))
 # -------------------------------------------------------------
 # CAN BE SET UP FOR DIFFERENT PROJECTS
 project <- "OpenArrayTest"
