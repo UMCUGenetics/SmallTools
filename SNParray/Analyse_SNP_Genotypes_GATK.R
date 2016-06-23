@@ -4,9 +4,14 @@ library("ggplot2")
 library("gplots")
 # -------------------------------------------------------------
 # SET TO THE RELEVANT DIRECTORY FOR ALL VCFs
-vcfdir <- "~/data/24SNPs/VCFbased/vcfs"
-today <- format(Sys.time(), "%d_%b_%Y")
 
+
+# EDIT ME
+vcfdir <- "~/data/24SNPs/VCFbased/vcfs"
+templatevcf <- "32SNPtaqman_design.vcf"
+
+
+today <- format(Sys.time(), "%d_%b_%Y")
 # -------------------------------------------------------------
 # COLORS FOR THE DIFFERENT GENOTYPES
 myColors <- c("blue","green","red","white")
@@ -30,12 +35,12 @@ calls <- lapply(vcffiles, readVcf, "hg19")
 samplenames <- unlist(lapply(calls, function(x) samples(header(x)) ))
 
 # EXTRACT SNP data from VCF
-template <- readVcf("taqman_design.vcf", "hg19")
+template <- readVcf(templatevcf, "hg19")
 nrpositions <- nrow(geno(template)$GT)
 snpnames <- names(ranges(template))
 rm(template)
 
-template <- data.frame(read.table("taqman_design.vcf", sep='\t', header=F))
+template <- data.frame(read.table(templatevcf, sep='\t', header=F))
 colnames(template) <- c("Chr","Pos","rsID","Ref","Alt","Qual","Info","Format","Test")
 template$Merge <- paste0(as.character(template$Chr),":",template$Pos)
 rownames(template) <- snpnames
