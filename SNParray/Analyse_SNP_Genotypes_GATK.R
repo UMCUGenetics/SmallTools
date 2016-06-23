@@ -97,7 +97,7 @@ grouping <- cutree(TAD.cluster, h=5)
 temper <- data.frame(cbind(clean_num_gentyp, grouping))
 temper$Class <- "identified"
 
-pdf(file=paste0(today,"_Genotyping_taqman_32SNP_perGroup.pdf"), width=30, height=15, pointsize=15)
+pdf(file=paste0(today,"_Grouped_Calls_",panel,".pdf"), width=30, height=15, pointsize=15)
 for (i in c(1:max(grouping))) {
   rows <- rownames(clean_num_gentyp)[grouping==i]
   plotname <- i
