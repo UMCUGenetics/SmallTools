@@ -4,6 +4,7 @@ import re
 import vcf
 
 #GENE FORMAT
+##chr	start	stop	name
 #3	178866311	178952497	PIK3CA
 
 from optparse import OptionParser
