@@ -16,8 +16,8 @@ parser.add_option("--sambamba",	dest="sambamba",	help="Path to sambamba/samtools
 parser.add_option("--bamdir",	dest="bamdir",		help="Path to directory containing BAM files",		default=False)
 parser.add_option("--outdir",	dest="outdir",		help="Path to directory to write output to",		default="./telomeres/")
 parser.add_option("--repsize",	dest="repsize",		help="Number of required matching 6mers (TTAGGG)",	default=10)
-parser.add_option("--s",		dest="nr_samples",	help="Number of Samples to analyse simulatiously",	default=6)
-parser.add_option("--t",		dest="nr_cpus",		help="Number of CPUs to use per sample",			default=2)
+parser.add_option("--s",	dest="nr_samples",	help="Number of Samples to analyse simulatiously",	default=6)
+parser.add_option("--t",	dest="nr_cpus",		help="Number of CPUs to use per sample",		default=2)
 (options, args) = parser.parse_args()
 # -------------------------------------------------
 
