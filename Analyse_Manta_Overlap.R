@@ -19,6 +19,7 @@ options <- list(
 		make_option("--passonly",						type="logical", 	default=TRUE,			help="if TRUE, ignore non PASS SVs [default %default]", metavar="logical"),
 		make_option("--ignoretype",					type="logical", 	default=TRUE,			help="!TODO! if TRUE, ignore SV types [default %default] [not implemented yet]", metavar="logical")
 )
+#TODO Add SV type aware code so we can use the ignoretype flag
 #-------------------------------------------------------------------------------------------------------------------------#
 # FUNCTIONS
 
