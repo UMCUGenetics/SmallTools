@@ -80,7 +80,7 @@ def listener(q):
 	'''listens for messages on the q, writes to file. '''
 	#sys.stdout.write('Starting listener\n')
 
-	f = open(os.path.join(options.outdir, "TelomereCounts.txt"), 'wb')
+	f = open(os.path.join(options.outdir, "TelomereCounts_"+time.strftime("%d_%m_%Y")+".txt"), 'wb')
 	f.write('\t'.join(["#Sample","TotalReads","TelomericReads","NormalisedFraction"])+'\n')
 	f.flush()
 
