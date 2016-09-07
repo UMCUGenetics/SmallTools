@@ -101,8 +101,8 @@ toplot$DP <- apply(toplot[,c("PairDP","SplitDP")],1,max)
 toplot$PNR <- apply(toplot[,c("PairPNR","SplitPNR")],1,max)
 
 #-------------------------------------------------------------------------------------------------------------------------#
-
-pdf()
+plotfile <- paste0("SVFiltering_",gsub("vcf", "pdf", arguments$sample))
+pdf(file=plotfile, width=15, height=15, pointsize=12, bg="white")
 	print(ggplot(toplot, aes(DP, PNR)) + geom_jitter(aes(colour=Type, alpha=Unique), width=.01, height=.05))
 dev.off()
 #+ geom_vline(xintercept=10)
