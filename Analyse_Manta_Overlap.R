@@ -48,7 +48,7 @@ calc_dp <- function(x) {
 # Process Manta file into a more usable format for filtering purposes
 process_manta_vcf <- function(vcffile, filter) {
 	vcfdf <- data.frame(rowRanges(vcffile))
-	if (filter==TRUE) {
+	if (filter) {
 		vcfdf <- subset(vcfdf, Filter=="PASS")
 	}
 	vcfdf$end <- info(vcffile)$END
