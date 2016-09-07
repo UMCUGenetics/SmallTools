@@ -102,7 +102,7 @@ if (arguments$passonly) {
 	selected_events <- selected_events[rowData(samplevcf)[selected_events,"FILTER"]=="PASS"]
 }
 # WRITE RESULTS TO VCF FILE
-outvcf <- paste0(gsub("vcf", "", arguments$sample),"_FilteredFor_",arguments$control)
+outvcf <- paste0(gsub(".vcf", "", arguments$sample),"_FilteredFor_",arguments$control)
 writeVcf(samplevcf[selected_events,], outvcf)
 
 # PLOT THE FILTERING OVERVIEW
