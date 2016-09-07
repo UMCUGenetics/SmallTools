@@ -1,6 +1,3 @@
-#TODO remove fugly HPC only code, needed for now since module system overrides R_LIB from profile
-.libPaths(c("/hpc/local/CentOS7/cog_bioinf/R_libs/3.2.2/",.libPaths()))
-
 require(optparse)
 require(VariantAnnotation)
 require(ggplot2)
@@ -104,12 +101,15 @@ toplot$PNR <- apply(toplot[,c("PairPNR","SplitPNR")], 1, max)
 if (arguments$passonly) {
 	selected_events <- selected_events[rowData(samplevcf)[selected_events,"FILTER"]=="PASS"]
 }
+
+cleanname <- gsub(".gz", "", arguments$sample)
+cleanname <- gsub(".vcf", "", cleanname)
 # WRITE RESULTS TO VCF FILE
-outvcf <- paste0(gsub(".vcf", "", arguments$sample),"_FilteredFor_",arguments$control)
+outvcf <- paste0(cleanname,"_FilteredFor_",gsub(".gz", "",arguments$control))
 writeVcf(samplevcf[selected_events,], outvcf)
 
 # PLOT THE FILTERING OVERVIEW
-plotfile <- paste0("SVfiltering_",gsub("vcf", "pdf", arguments$sample))
+plotfile <- paste0("SVfiltering_",cleanname,".pdf"))
 pdf(file=plotfile, width=15, height=15, pointsize=12, bg="white")
 	print(ggplot(toplot, aes(DP, PNR)) + geom_jitter(aes(colour=Type, alpha=Unique, shape=PASS), width=.01, height=.05))
 dev.off()
