@@ -109,7 +109,8 @@ outvcf <- paste0(cleanname,"_FilteredFor_",gsub(".gz", "",arguments$control))
 writeVcf(samplevcf[selected_events,], outvcf)
 
 # PLOT THE FILTERING OVERVIEW
-plotfile <- paste0("SVfiltering_",cleanname,".pdf"))
+plotfile <- paste0("SVfiltering_",cleanname,".pdf")
+
 pdf(file=plotfile, width=15, height=15, pointsize=12, bg="white")
 	print(ggplot(toplot, aes(DP, PNR)) + geom_jitter(aes(colour=Type, alpha=Unique, shape=PASS), width=.01, height=.05))
 dev.off()
