@@ -24,24 +24,16 @@ options <- list(
 
 # Calculate Manta percentage non refrence
 calc_pnr <- function(x) {
-	if (lengths(x) <= 1) {
-		return(0.0)
-	}
+	if (lengths(x) <= 1) {	return(0.0)}
 	y <- unlist(x)
-	if (y[1]==0 && y[2]==0){
-		return(0.0)
-	}
-	if (y[1]==0) {
-		return(1.0)
-	}
+	if (y[1]==0 && y[2]==0){return(0.0)}
+	if (y[1]==0) {					return(1.0)	}
 	return (y[2]/sum(y))
 }
 
 # Calculate Manta depth
 calc_dp <- function(x) {
-	if (lengths(x) <= 1) {
-		return(0)
-	}
+	if (lengths(x) <= 1) {return(0)}
 	return(sum(unlist(x)))
 }
 
