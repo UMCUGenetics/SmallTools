@@ -14,10 +14,10 @@ options <- list(
 		make_option(c("-s", "--sample"),	 	type="character",										help="Sample variants", metavar="vcf"),
 		make_option(c("-c", "--control"),		type="character",										help="Control variants", metavar="vcf"),
 
-		make_option(c("-r", "--reference"),	type="character",	default="hg19"			help="Refrence genome build", metavar="ref"),
-		make_option("--overlap",						type="double",		default=0.85,				help="Maximum fraction to overlap reference calls [default %default]", metavar="number"),
-		make_option("--passonly",						type="logical", 	default=TRUE,				help="if TRUE, ignore non PASS SVs [default %default]", metavar="logical"),
-		make_option("--ignoretype",					type="logical", 	default=TRUE,				help="if TRUE, ignore SV types [default %default] TODO [not implemented yet]", metavar="logical")
+		make_option(c("-r", "--reference"),	type="character",	default="hg19"		help="Refrence genome build", metavar="ref"),
+		make_option("--overlap",						type="double",		default=0.85,			help="Maximum fraction to overlap reference calls [default %default]", metavar="number"),
+		make_option("--passonly",						type="logical", 	default=TRUE,			help="if TRUE, ignore non PASS SVs [default %default]", metavar="logical"),
+		make_option("--ignoretype",					type="logical", 	default=TRUE,			help="if TRUE, ignore SV types [default %default] TODO [not implemented yet]", metavar="logical")
 )
 #-------------------------------------------------------------------------------------------------------------------------#
 # FUNCTIONS
@@ -90,10 +90,10 @@ writeVcf(samplevcf[selected_events,], "test_sampleUnique.vcf")
 #-------------------------------------------------------------------------------------------------------------------------#
 
 toplot <- data.frame(Type=as.character(sample$type))
-toplot$PairPNR <- apply(data.frame(geno(calls[[2]])$PR), 1, function(x) calc_pnr(x))
-toplot$SplitPNR <- apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_pnr(x))
-toplot$PairDP <- apply(data.frame(geno(calls[[2]])$PR), 1, function(x) calc_dp(x))
-toplot$SplitDP <- apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_dp(x))
+toplot$PairPNR <- 	apply(data.frame(geno(calls[[2]])$PR), 1, function(x) calc_pnr(x))
+toplot$SplitPNR <-	apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_pnr(x))
+toplot$PairDP <- 		apply(data.frame(geno(calls[[2]])$PR), 1, function(x) calc_dp(x))
+toplot$SplitDP <- 	apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_dp(x))
 
 toplot$Unique <- FALSE
 toplot$Unique[selected_events] <- TRUE
