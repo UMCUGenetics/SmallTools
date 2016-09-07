@@ -87,8 +87,10 @@ hitsdf$hitwidth <- width(overlaps)
 hitsdf$perc <-round(hitsdf$hitwidth/hitsdf$origwidth,3)
 uniqueness <- aggregate(perc ~ queryHits, data=hitsdf, FUN=sum)
 
-selected_events <- subset(uniqueness, perc>=.85)$queryHits
-writeVcf(samplevcf[selected_events,], "test_sampleUnique.vcf")
+# SELECT EVENTS THAT MATCH THE CRITERIA
+selected_events <- subset(uniqueness, perc>=arguments$overlap)$queryHits
+outvcf <- paste0(gsub("vcf", "", arguments$sample),"_FilteredFor_",arguments$control)
+writeVcf(samplevcf[selected_events,], outvcf)
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
@@ -100,8 +102,8 @@ toplot$SplitDP <- 	apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_dp
 
 toplot$Unique <- FALSE
 toplot$Unique[selected_events] <- TRUE
-toplot$DP <- apply(toplot[,c("PairDP","SplitDP")],1,max)
-toplot$PNR <- apply(toplot[,c("PairPNR","SplitPNR")],1,max)
+toplot$DP <-	apply(toplot[,c("PairDP","SplitDP")],   1, max)
+toplot$PNR <- apply(toplot[,c("PairPNR","SplitPNR")], 1, max)
 
 #-------------------------------------------------------------------------------------------------------------------------#
 plotfile <- paste0("SVFiltering_",gsub("vcf", "pdf", arguments$sample))
