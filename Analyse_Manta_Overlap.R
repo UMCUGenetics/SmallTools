@@ -1,9 +1,9 @@
+#TODO remove fugly HPC only code, needed for now since module system overrides R_LIB from profile
+.libPaths(c("/hpc/local/CentOS7/cog_bioinf/R_libs/3.2.2/",.libPaths()))
+
 require(optparse)
 require(VariantAnnotation)
 require(ggplot2)
-
-#TODO remove fugly HPC only code, needed for now since module system overrides R_LIB from profile
-.libPaths(c("/hpc/local/CentOS7/cog_bioinf/R_libs/3.2.2/",.libPaths()))
 #-------------------------------------------------------------------------------------------------------------------------#
 options <- list(
 		make_option(c("-v", "--verbose"),	action="store_true",	default=TRUE,		help="Print extra output [default]"),
