@@ -11,13 +11,13 @@ options <- list(
 		make_option(c("-v", "--verbose"),	action="store_true",	default=TRUE,		help="Print extra output [default]"),
 		make_option(c("-q", "--quietly"),	action="store_false",	dest="verbose",	help="Print little output"),
 
-		make_option(c("-s", "--sample"),	 	type="character",										help="Sample variants", metavar="vcf"),
-		make_option(c("-c", "--control"),		type="character",										help="Control variants", metavar="vcf"),
+		make_option(c("-s", "--sample"),	 	type="character",										help="Sample variants",		metavar="vcf"),
+		make_option(c("-c", "--control"),		type="character",										help="Control variants",	metavar="vcf"),
 
-		make_option(c("-r", "--reference"),	type="character",	default="hg19"		help="Refrence genome build", metavar="ref"),
+		make_option(c("-r", "--reference"),	type="character",	default="hg19"		help="Reference genome build", metavar="ref"),
 		make_option("--overlap",						type="double",		default=0.85,			help="Maximum fraction to overlap reference calls [default %default]", metavar="number"),
 		make_option("--passonly",						type="logical", 	default=TRUE,			help="if TRUE, ignore non PASS SVs [default %default]", metavar="logical"),
-		make_option("--ignoretype",					type="logical", 	default=TRUE,			help="if TRUE, ignore SV types [default %default] TODO [not implemented yet]", metavar="logical")
+		make_option("--ignoretype",					type="logical", 	default=TRUE,			help="!TODO! if TRUE, ignore SV types [default %default] [not implemented yet]", metavar="logical")
 )
 #-------------------------------------------------------------------------------------------------------------------------#
 # FUNCTIONS
