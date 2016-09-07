@@ -95,10 +95,10 @@ writeVcf(samplevcf[selected_events,], outvcf)
 #-------------------------------------------------------------------------------------------------------------------------#
 
 toplot <- data.frame(Type=as.character(sample$type))
-toplot$PairPNR <- 	apply(data.frame(geno(calls[[2]])$PR), 1, function(x) calc_pnr(x))
-toplot$SplitPNR <-	apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_pnr(x))
-toplot$PairDP <- 		apply(data.frame(geno(calls[[2]])$PR), 1, function(x) calc_dp(x))
-toplot$SplitDP <- 	apply(data.frame(geno(calls[[2]])$SR), 1, function(x) calc_dp(x))
+toplot$PairPNR <- 	apply(data.frame(geno(samplevcf)$PR), 1, function(x) calc_pnr(x))
+toplot$SplitPNR <-	apply(data.frame(geno(samplevcf)$SR), 1, function(x) calc_pnr(x))
+toplot$PairDP <- 		apply(data.frame(geno(samplevcf)$PR), 1, function(x) calc_dp(x))
+toplot$SplitDP <- 	apply(data.frame(geno(samplevcf)$SR), 1, function(x) calc_dp(x))
 
 toplot$Unique <- FALSE
 toplot$Unique[selected_events] <- TRUE
@@ -106,7 +106,7 @@ toplot$DP <-	apply(toplot[,c("PairDP","SplitDP")],   1, max)
 toplot$PNR <- apply(toplot[,c("PairPNR","SplitPNR")], 1, max)
 
 #-------------------------------------------------------------------------------------------------------------------------#
-plotfile <- paste0("SVFiltering_",gsub("vcf", "pdf", arguments$sample))
+plotfile <- paste0("SVfiltering_",gsub("vcf", "pdf", arguments$sample))
 pdf(file=plotfile, width=15, height=15, pointsize=12, bg="white")
 	print(ggplot(toplot, aes(DP, PNR)) + geom_jitter(aes(colour=Type, alpha=Unique), width=.01, height=.05))
 dev.off()
