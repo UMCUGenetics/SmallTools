@@ -12,7 +12,7 @@ Tools are developed according to the [Small tools Manifesto](https://github.com/
    Number of telomeric 6-mers that need to matched can be set.
    Uses multiprocessing to distribute view/count commands over different processes.
    Stores matching telomeric reads in a SAM file for further processing.  
-   Uses total read count of the SAM and BAM files to generate a normalised telomere fraction.  
+   Uses total read count of the SAM and BAM files to generate a normalised telomeric fraction.  
   
 ---
 ### WGS annotation tools
