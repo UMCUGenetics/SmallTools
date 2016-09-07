@@ -72,15 +72,18 @@ control <- process_manta_vcf(readVcf(arguments$control, arguments$reference), FA
 
 #-------------------------------------------------------------------------------------------------------------------------#
 
-
+# DETERMIN REGIONS UNIQUE TO SAMPLE
 sampleunique <- setdiff(sample, control)
 rm(control)
-hits <- findOverlaps(sample, sampleunique, minoverlap=1)
 
+# DETERMINE IF OVERLAP OF SVs WITH UNIQUE REGIONS
+hits <- findOverlaps(sample, sampleunique, minoverlap=1)
 hitsdf <- data.frame(hits)
 hitsdf$origwidth <- width(sample[queryHits(hits)])
+# DETERMINE WHAT OVERLAPS SVs WITH UNIQUE REGIONS
 overlaps <- pintersect(sample[queryHits(hits)], sampleunique[subjectHits(hits)])
 hitsdf$hitwidth <- width(overlaps)
+# DETERMINE PERCENTAGE OVERLAP OF SVs WITH UNIQUE REGIONS
 hitsdf$perc <-round(hitsdf$hitwidth/hitsdf$origwidth,3)
 uniqueness <- aggregate(perc ~ queryHits, data=hitsdf, FUN=sum)
 
