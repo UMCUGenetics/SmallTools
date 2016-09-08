@@ -30,9 +30,8 @@ toselect = ["missense_variant", "splice_region_variant", "inframe_deletion", "st
 
 # -------------------------------------------------
 
-
-
-
+# Extract population frequency from VCF record
+# Annoation assumed to be in SNPeff formatting
 def find_popfreq(vcf_record):
 	popfreq=0.0
 
@@ -51,9 +50,9 @@ def find_popfreq(vcf_record):
 
 	return(popfreq)
 
+# Determine the most damaging effect of the variant
 def find_effects(vcf_record):
-
-	print(vcf_record.INFO["ANN"])
+	#print(vcf_record.INFO["ANN"])
 	if vcf_record.INFO["ANN"]:
 		# STORE ALL ANNOTATIONS
 		ann = vcf_record.INFO["ANN"].split(",")
@@ -72,15 +71,14 @@ def find_effects(vcf_record):
 					if vocabulary[effect] > vocabulary[posdict[varcounter]["Effects"][alt.index(allele)]]:
 						posdict[varcounter]["Effects"][alt.index(allele)] = effect
 
-
+# Extract driver gene regions from VCF
 def extract_gene(vcffile, thisgene):
 	# SUBSET VCF FOR GENE REGION
 	tb = tabix.open(vcffile)
 	return(tb.query(thisgene["Chr"], thisgene["Start"]-20, thisgene["Stop"]+20))
 
-
+# CHECK AND GENERATE GZ AND TBI
 def zip_and_index(vcffile):
-	# CHECK AND GENERATE GZ AND TBI
 	if not os.path.exists(vcffile+".gz"):
 		os.system(options.bgzip+" -c "+vcffile+" > "+vcffile+".gz")
 	if not os.path.exists(vcffile+".gz"+".tbi"):
@@ -93,7 +91,7 @@ def main():
 	for vcf_file in file_list:
 		zip_and_index(vcf_file)
 
-	genelist=open('genelist.txt','r')
+	genelist=open(options.genelist, 'r')
 
 	# FOR EACH GENE OF INTREST
 	for gene in genelist:
@@ -121,10 +119,6 @@ def main():
 
 				effect = find_effects(vcf_record)
 	genelist.close()
-
-
-
-
 
 
 def test():
