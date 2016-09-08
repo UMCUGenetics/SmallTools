@@ -10,8 +10,8 @@ import vcf
 from optparse import OptionParser
 # -------------------------------------------------
 parser = OptionParser()
-parser.add_option("--vcfdir",	dest="vcfdir",		help="Path to directory containing VCF files",		default=False)
-parser.add_option("--outdir",	dest="outdir",		help="Path to directory to write output to",		default="./DriverProfile/")
+parser.add_option("--vcfdir",	dest="vcfdir",		help="Path to directory containing VCF files",	default=False)
+parser.add_option("--outdir",	dest="outdir",		help="Path to directory to write output to",	default="./DriverProfile/")
 parser.add_option("--genelist",	dest="genelist",	help="File containing Genes to test/plot)",		default=False)
 
 parser.add_option("--bgzip",	dest="bgzip",		help="Path to bgzip binary",				default="bgzip")
@@ -19,7 +19,7 @@ parser.add_option("--tabix",	dest="tabix",		help="Path to tabix binary",				defa
 
 parser.add_option("--t",	dest="nrcpus",		help="Number of CPUs to use per sample",		default=2)
 
-parser.add_option("--dp",	dest="mindepth",	help="Minumum read depth to consider reliable",		default=10)
+parser.add_option("--dp",	dest="mindepth",	help="Minumum read depth to consider reliable",	default=10)
 parser.add_option("--af",	dest="minvaf",		help="Minumum variant allele fraction",			default=0.15)
 parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",			default=0.05)
 (options, args) = parser.parse_args()
@@ -27,6 +27,27 @@ parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",	
 
 vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "missense_variant":1.5, "splice_region_variant":2, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
 toselect = ["missense_variant", "splice_region_variant", "inframe_deletion", "stop_gained", "nonsense_mediated_decay", "frameshift_variant"]
+
+# -------------------------------------------------
+
+def check_arguments():
+	if not os.path.exists(options.vcfdir):
+		print("Invalid BAM folder %s"%(options.vcfdir))
+		return False
+
+	if not os.path.exists(options.outdir):
+		print("Creating output folder %s"%(options.outdir))
+		try:
+			os.makedir(options.outdir)
+		except OSError:
+			print("Invalid / unable to create, output folder %s"%(options.outdir))
+			return False
+
+	print("Running with the following settings:")
+	print("------------------------------------")
+	print(options)
+	print("------------------------------------")
+	return True
 
 # -------------------------------------------------
 
@@ -98,7 +119,7 @@ def main():
 		thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 		print(thisgene)
 
-		# FOR EACH TUMOR
+		# FOR EACH TUMOR SAMPLE
 		for vcf_file in file_list:
 			vcf_records = extract_gene(vcf_file, thisgene)
 
@@ -120,7 +141,7 @@ def main():
 				effect = find_effects(vcf_record)
 	genelist.close()
 
-
+# -------------------------------------------------
 def test():
 	for j in range(0, len(gts)):
 		effect = "None"
@@ -148,12 +169,17 @@ def test():
 	newdat = dict(zip(samplenames,varcount))
 	df[thisgene[3]] = pd.Series(newdat)
 
+	print(df)
+	df.to_csv("MutationOverview.txt",sep='\t')
+# -------------------------------------------------
 
+print("Starting Analysis")
 
+if __name__ == '__main__':
+	# check specified options
+	if check_arguments():
+		main()
+	else:
+		print("Error in provided arguments")
 
-
-
-
-
-print(df)
-df.to_csv("MutationOverview.txt",sep='\t')
+print("DONE")
