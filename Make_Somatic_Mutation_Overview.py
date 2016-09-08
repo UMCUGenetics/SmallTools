@@ -89,7 +89,7 @@ def zip_and_index(vcffile):
 # -------------------------------------------------
 
 def main():
-	file_list = glob.glob(os.path.join(options.vcfdir, "*.bam"))
+	file_list = glob.glob(os.path.join(options.vcfdir, "*.vcf"))
 	for vcf_file in file_list:
 		zip_and_index(vcf_file)
 
