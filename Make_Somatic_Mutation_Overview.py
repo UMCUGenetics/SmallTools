@@ -2,6 +2,8 @@
 import os
 import re
 import vcf
+import glob
+import numpy as np
 
 #GENE FORMAT
 ##chr	start	stop	name
@@ -29,7 +31,8 @@ vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0
 toselect = ["missense_variant", "splice_region_variant", "inframe_deletion", "stop_gained", "nonsense_mediated_decay", "frameshift_variant"]
 
 # -------------------------------------------------
-
+debug = True
+# -------------------------------------------------
 def check_arguments():
 	if not os.path.exists(options.vcfdir):
 		print("Invalid BAM folder %s"%(options.vcfdir))
@@ -54,49 +57,51 @@ def check_arguments():
 # Extract population frequency from VCF record
 # Annoation assumed to be in SNPeff formatting
 def find_popfreq(vcf_record):
-	popfreq=0.0
+	popfreq=[0.0]
+	#print(vcf_record.INFO)
+	freq_fields = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq"]
 
-	print(vcf_record.INFO["dbNSFP_ExAC_AF"])
-	ExAC_search = vcf_record.INFO["dbNSFP_ExAC_AF"]
-	if ExAC_search:
-		popfreq = [float(x) for x in ExAC_search.group(1).split(",")]
+	for field in freq_fields:
+		if field in vcf_record.INFO:
+			popfreq.append([float(x) for x in vcf_record.INFO[field].split(",")])
 
-	ExAC_search = vcf_record.INFO["dbNSFP_ExAC_Adj_AF"]
-	if ExAC_search:
-		popfreq = [float(x) for x in ExAC_search.group(1).split(",")]
-
-	GoNL_search = vcf_record.INFO["GoNLv5_Freq"]
-	if GoNL_search:
-		popfreq = [float(x) for x in GoNL_search.group(1).split(",")]
-
+	#print(popfreq)
 	return(popfreq)
 
 # Determine the most damaging effect of the variant
 def find_effects(vcf_record):
-	#print(vcf_record.INFO["ANN"])
-	if vcf_record.INFO["ANN"]:
-		# STORE ALL ANNOTATIONS
-		ann = vcf_record.INFO["ANN"].split(",")
-		for pred in ann:
-			# SPLIT THE SEPERATE FIELDS WITHIN THE ANNOTATION
-			items = pred.split("|")
-			allele = items[0]
-			effects = items[1].split("&")
-			for effect in effects:
-				if effect not in vocabulary:
-					# A NEW MUTATION EFFECT WAS FOUND
-					print effect
-					print ann
-				else:
-					# STORE THE MOST DELETERIOUS EFFECT
-					if vocabulary[effect] > vocabulary[posdict[varcounter]["Effects"][alt.index(allele)]]:
-						posdict[varcounter]["Effects"][alt.index(allele)] = effect
+	maxeffect="None"
+	if (debug):
+		print(vcf_record.INFO)
 
-# Extract driver gene regions from VCF
-def extract_gene(vcffile, thisgene):
-	# SUBSET VCF FOR GENE REGION
-	tb = tabix.open(vcffile)
-	return(tb.query(thisgene["Chr"], thisgene["Start"]-20, thisgene["Stop"]+20))
+	if "ANN" not in vcf_record.INFO:
+		return maxeffect
+
+	# TRAVERSE ALL ANNOTATIONS
+	for pred in vcf_record.INFO["ANN"]:
+		# SPLIT THE SEPERATE FIELDS WITHIN THE ANNOTATION
+		items = pred.split("|")
+		allele = items[0]
+		effects = items[1].split("&")
+		for effect in effects:
+			if effect not in vocabulary:
+				# A NEW MUTATION EFFECT WAS FOUND
+				print effect
+				print ann
+			else:
+				# STORE THE MOST DELETERIOUS EFFECT
+				if vocabulary[effect] > maxeffect:
+					maxeffect = effect
+	if debug:
+		print maxeffect
+	return(maxeffect)
+
+# ETRACT THE MOST DELETERIOUS MUTATIONS IN A GENE
+def select_maximum_effect(effects):
+	effectvalues = [vocabulary[eff] for eff in effects]
+	if debug: print(effectvalues)
+	indices = np.argmax(effectvalues)
+	return(effects[indices])
 
 # CHECK AND GENERATE GZ AND TBI
 def zip_and_index(vcffile):
@@ -112,36 +117,75 @@ def main():
 	for vcf_file in file_list:
 		zip_and_index(vcf_file)
 
-	genelist=open(options.genelist, 'r')
+	genelist=open(options.genelist, 'r').read().split('\n')
 
-	# FOR EACH GENE OF INTREST
-	for gene in genelist:
-		thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
-		print(thisgene)
+	df = {}
 
-		# FOR EACH TUMOR SAMPLE
-		for vcf_file in file_list:
-			vcf_records = extract_gene(vcf_file, thisgene)
+	for vcf_file in file_list:
+		if (debug):
+			print vcf_file
+		vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
+		sample = vcfread.samples[0]
+		print sample
+		df[sample] = {}
 
+		# FOR EACH GENE OF INTREST
+		for gene in genelist:
+			if len(gene)<=0:
+				continue
+			thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
+
+			if (debug):
+				print(thisgene)
+
+			# FOR EACH TUMOR SAMPLE
+			vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
+
+			effects = []
 			# FILTER NON-QC RECORDS
 			for vcf_record in vcf_records:
-				# FIXME
 				# CHECK TOTAL COVERAGE
-				if sum(vcf_record.SAMPLE.AD) < options.mindepth:
+				# print sum(vcf_record.genotype(sample)['AD'])
+				if sum(vcf_record.genotype(sample)['AD']) < options.mindepth:
 					continue
 
 				# CHECK VAF
-				if (sum(vcf_record.SAMPLE.AD[1:])/sum(vcf_record.SAMPLE.AD)) < options.minvaf:
+				# print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
+				if (sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])) < options.minvaf:
 					continue
 
 				# CHECK POPULATION FREQUENCY
+				# print find_popfreq(vcf_record)
 				if max(find_popfreq(vcf_record)) > options.popfreq:
 					continue
 
-				effect = find_effects(vcf_record)
-	genelist.close()
+				effects.append(find_effects(vcf_record))
+
+			if len(effects) <= 0:
+				df[sample][thisgene["SYMBOL"]] = "None"
+			else:
+				df[sample][thisgene["SYMBOL"]] = select_maximum_effect(effects)
+
+
+		print(sample, df[sample])
+
+
+
 
 # -------------------------------------------------
+
+print("Starting Analysis")
+
+if __name__ == '__main__':
+	if check_arguments():
+		main()
+	else:
+		print("Error in provided arguments")
+
+print("DONE")
+
+# -------------------------------------------------
+
 def test():
 	for j in range(0, len(gts)):
 		effect = "None"
@@ -166,20 +210,8 @@ def test():
 	affected = [x in toselect for x in varcount ]
 	samplenames = list(gtdf.columns.values)
 	tumors = ["R" not in x for x in samplenames]
-	newdat = dict(zip(samplenames,varcount))
+	newdat = dict(zip(samplenames, varcount))
 	df[thisgene[3]] = pd.Series(newdat)
 
 	print(df)
 	df.to_csv("MutationOverview.txt",sep='\t')
-# -------------------------------------------------
-
-print("Starting Analysis")
-
-if __name__ == '__main__':
-	# check specified options
-	if check_arguments():
-		main()
-	else:
-		print("Error in provided arguments")
-
-print("DONE")
