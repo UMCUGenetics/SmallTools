@@ -27,11 +27,11 @@ parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",	
 (options, args) = parser.parse_args()
 # -------------------------------------------------
 
-vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "missense_variant":1.5, "splice_region_variant":2, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
-toselect = ["missense_variant", "splice_region_variant", "inframe_deletion", "stop_gained", "nonsense_mediated_decay", "frameshift_variant"]
+vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "missense_variant":1.5, "splice_region_variant":2, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
+toselect = [k for k,v in vocabulary.items() if v > 1]
 
 # -------------------------------------------------
-debug = True
+debug = False
 # -------------------------------------------------
 def check_arguments():
 	if not os.path.exists(options.vcfdir):
@@ -71,8 +71,7 @@ def find_popfreq(vcf_record):
 # Determine the most damaging effect of the variant
 def find_effects(vcf_record):
 	maxeffect="None"
-	if (debug):
-		print(vcf_record.INFO)
+	if debug: print(vcf_record.INFO)
 
 	if "ANN" not in vcf_record.INFO:
 		return maxeffect
@@ -86,9 +85,11 @@ def find_effects(vcf_record):
 		for effect in effects:
 			if effect not in vocabulary:
 				# A NEW MUTATION EFFECT WAS FOUND
-				print pred
-				print effect
-				print ann
+				if debug:
+					print "NEW Mutation effect identified:"
+					print pred
+					print effect
+
 			else:
 				# STORE THE MOST DELETERIOUS EFFECT
 				if vocabulary[effect] > vocabulary[maxeffect]:
@@ -144,14 +145,16 @@ def main():
 			effects = []
 			# FILTER NON-QC RECORDS
 			for vcf_record in vcf_records:
-				# CHECK TOTAL COVERAGE
-				if debug:
-					print sum(vcf_record.genotype(sample)['AD'])
+				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
+				if isinstance(vcf_record.genotype(sample)['AD'], int):
+					#if vcf_record.genotype(sample)['AD'] < options.mindepth:
+					# IGNORE SINGLE AD VALUE SAMPLES
+					continue
 				if sum(vcf_record.genotype(sample)['AD']) < options.mindepth:
 					continue
 
 				# CHECK VAF
-				# print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
+				#if debug: print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
 				if (sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])) < options.minvaf:
 					continue
 
@@ -169,7 +172,7 @@ def main():
 
 
 		#print(sample, df[sample])
-	
+
 	print "Sample\t"+'\t'.join(df[sample].keys())
 	for sp in df:
 		print sp+'\t'+'\t'.join(df[sp].values())
