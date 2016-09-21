@@ -145,7 +145,8 @@ def main():
 			# FILTER NON-QC RECORDS
 			for vcf_record in vcf_records:
 				# CHECK TOTAL COVERAGE
-				# print sum(vcf_record.genotype(sample)['AD'])
+				if debug:
+					print sum(vcf_record.genotype(sample)['AD'])
 				if sum(vcf_record.genotype(sample)['AD']) < options.mindepth:
 					continue
 
