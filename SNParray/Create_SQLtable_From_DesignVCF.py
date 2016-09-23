@@ -12,7 +12,6 @@ if not os.path.exists(options.vcf_file):
 	print "Invalid VCF file"
 	exit(0)
 
-
 TABLE_NAME = os.path.basename(options.vcf_file).replace("_design.vcf","")
 VCF_READER = vcf.Reader(open(options.vcf_file, 'r'))
 
