@@ -3,7 +3,7 @@ ref="/../../Homo_sapiens.GRCh37.GATK.illumina/Homo_sapiens.GRCh37.GATK.illumina.
 snp="taqman_design.vcf"
 gatk="/../../GenomeAnalysisTK-3.2-0/GenomeAnalysisTK.jar"
 call="UnifiedGenotyper"
-panel="WGS_32SNP_OpenArrayCalls"
+panel=${snp%_*}
 
 # First argument is bamfolder
 folder=$1

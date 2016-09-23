@@ -5,7 +5,7 @@ from optparse import OptionParser
 
 parser = OptionParser()
 parser.add_option("--vcf",	dest="vcf_file",     help="Path to VCF to convert",       default=False)
-#parser.add_option("--conf",	dest="config_file",  help="Path to DataBase config file", default=False)
+parser.add_option("--conf",	dest="config_file",  help="Path to DataBase config file", default=False)
 (options, args) = parser.parse_args()
 
 if not os.path.exists(options.vcf_file):
