@@ -1,6 +1,6 @@
 # SETTINGS
 ref="/../../Homo_sapiens.GRCh37.GATK.illumina/Homo_sapiens.GRCh37.GATK.illumina.fasta"
-snp="taqman_design.vcf"
+snp="32SNPtaqman_design.vcf"
 gatk="/../../GenomeAnalysisTK-3.2-0/GenomeAnalysisTK.jar"
 call="UnifiedGenotyper"
 panel=${snp%_*}
