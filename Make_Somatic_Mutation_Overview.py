@@ -146,6 +146,7 @@ def main():
 			effects = []
 			# FILTER NON-QC RECORDS
 			for vcf_record in vcf_records:
+				print vcf_record
 				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
 				if isinstance(vcf_record.genotype(sample)['AD'], int):
 					#if vcf_record.genotype(sample)['AD'] < options.mindepth:
