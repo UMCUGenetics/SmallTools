@@ -173,7 +173,7 @@ def main():
 
 
 		#print(sample, df[sample])
-		print "Sample\t"+'\t'.join(df[sample].keys())
+		if (debug): print "Sample\t"+'\t'.join(df[sample].keys())
 
 	print "##############################"
 	for sp in df:
