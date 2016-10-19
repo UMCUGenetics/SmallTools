@@ -63,8 +63,8 @@ def find_popfreq(vcf_record):
 
 	for field in freq_fields:
 		if field in vcf_record.INFO:
-			#print vcf_record.INFO
-			popfreq.append([float(x) for x in vcf_record.INFO[field].split(",")])
+			#print vcf_record.INFO[field]
+			popfreq.append([float(x) for x in vcf_record.INFO[field]])
 
 	#print(popfreq)
 	return(popfreq)
@@ -176,8 +176,8 @@ def main():
 
 		#print(sample, df[sample])
 		print "Sample\t"+'\t'.join(df[sample].keys())
-		
-		
+
+
 	for sp in df:
 		print sp+'\t'+'\t'.join(df[sp].values())
 
