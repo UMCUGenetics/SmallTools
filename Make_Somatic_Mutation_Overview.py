@@ -153,17 +153,17 @@ def main():
 					#if vcf_record.genotype(sample)['AD'] < options.mindepth:
 					# IGNORE SINGLE AD VALUE SAMPLES
 					continue
-				if sum(vcf_record.genotype(sample)['AD']) < options.mindepth:
+				if sum(vcf_record.genotype(sample)['AD']) < int(options.mindepth):
 					continue
 
 				# CHECK VAF
 				if debug: print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
-				if (sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])) < options.minvaf:
+				if (sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])) < float(options.minvaf):
 					continue
 
 				# CHECK POPULATION FREQUENCY
 				# print find_popfreq(vcf_record)
-				if max(find_popfreq(vcf_record)) > options.popfreq:
+				if max(find_popfreq(vcf_record)) > float(options.popfreq):
 					continue
 
 				effects.append(find_effects(vcf_record))
