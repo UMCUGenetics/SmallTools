@@ -169,7 +169,11 @@ def main():
 			if len(effects) <= 0:
 				df[sample][thisgene["SYMBOL"]] = "None"
 			else:
-				df[sample][thisgene["SYMBOL"]] = select_maximum_effect(effects)
+				eff = select_maximum_effect(effects)
+				if eff in toselect:
+					df[sample][thisgene["SYMBOL"]] = eff
+				else:
+					df[sample][thisgene["SYMBOL"]] = "None"
 
 
 		#print(sample, df[sample])
