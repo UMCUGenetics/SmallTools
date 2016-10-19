@@ -12,8 +12,8 @@ import numpy as np
 from optparse import OptionParser
 # -------------------------------------------------
 parser = OptionParser()
-parser.add_option("--vcfdir",	dest="vcfdir",		help="Path to directory containing VCF files",	default=False)
-parser.add_option("--outdir",	dest="outdir",		help="Path to directory to write output to",	default="./DriverProfile/")
+parser.add_option("--vcfdir",	dest="vcfdir",		help="Path to directory containing VCF files",		default=False)
+parser.add_option("--outdir",	dest="outdir",		help="Path to directory to write output to",		default="./DriverProfile/")
 parser.add_option("--genelist",	dest="genelist",	help="File containing Genes to test/plot)",		default=False)
 
 parser.add_option("--bgzip",	dest="bgzip",		help="Path to bgzip binary",				default="bgzip")
@@ -21,8 +21,8 @@ parser.add_option("--tabix",	dest="tabix",		help="Path to tabix binary",				defa
 
 parser.add_option("--t",	dest="nrcpus",		help="Number of CPUs to use per sample",		default=2)
 
-parser.add_option("--dp",	dest="mindepth",	help="Minumum read depth to consider reliable",	default=10)
-parser.add_option("--af",	dest="minvaf",		help="Minumum variant allele fraction",			default=0.15)
+parser.add_option("--dp",	dest="mindepth",	help="Minumum read depth to consider reliable",		default=10)
+parser.add_option("--af",	dest="minvaf",		help="Minumum variant allele fraction",			default=0.25)
 parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",			default=0.05)
 
 parser.add_option("--debug",	dest="debug",		help="Flag for debug logging)",				default=False)
