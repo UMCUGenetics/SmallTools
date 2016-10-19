@@ -63,6 +63,7 @@ def find_popfreq(vcf_record):
 
 	for field in freq_fields:
 		if field in vcf_record.INFO:
+			print vcf_record.INFO
 			popfreq.append([float(x) for x in vcf_record.INFO[field].split(",")])
 
 	#print(popfreq)
