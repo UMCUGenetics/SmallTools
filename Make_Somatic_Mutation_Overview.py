@@ -28,7 +28,7 @@ parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",	
 # -------------------------------------------------
 
 vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "missense_variant":1.5, "splice_region_variant":2, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
-toselect = [k for k,v in vocabulary.items() if v > 1]
+toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 # -------------------------------------------------
 debug = False
@@ -175,11 +175,14 @@ def main():
 		#print(sample, df[sample])
 		if (debug): print "Sample\t"+'\t'.join(df[sample].keys())
 
-	print "##############################"
+	outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
+	outfile.write("Sample\t"+'\t'.join(df[sample].keys())+"\n")
+	#print "##############################"
 	for sp in df:
-		print sp+'\t'+'\t'.join(df[sp].values())
-	print "##############################"
-	df.to_csv(options.outdir+"/"+"MutationOverview.txt",sep='\t')
+		outfile.write(sp+'\t'+'\t'.join(df[sp].values())+"\n")
+	#	print sp+'\t'+'\t'.join(df[sp].values())
+	#print "##############################"
+	outfile.close()
 
 	
 
