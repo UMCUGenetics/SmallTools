@@ -24,6 +24,8 @@ parser.add_option("--t",	dest="nrcpus",		help="Number of CPUs to use per sample"
 parser.add_option("--dp",	dest="mindepth",	help="Minumum read depth to consider reliable",	default=10)
 parser.add_option("--af",	dest="minvaf",		help="Minumum variant allele fraction",			default=0.15)
 parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",			default=0.05)
+
+parser.add_option("--debug",	dest="debug",		help="Flag for debug logging)",				default=False)
 (options, args) = parser.parse_args()
 # -------------------------------------------------
 
@@ -31,7 +33,7 @@ vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0
 toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 # -------------------------------------------------
-debug = False
+debug = options.debug
 # -------------------------------------------------
 def check_arguments():
 	if not os.path.exists(options.vcfdir):
@@ -155,7 +157,7 @@ def main():
 					continue
 
 				# CHECK VAF
-				#if debug: print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
+				if debug: print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
 				if (sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])) < options.minvaf:
 					continue
 
