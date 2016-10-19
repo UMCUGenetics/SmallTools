@@ -95,8 +95,7 @@ def find_effects(vcf_record):
 				# STORE THE MOST DELETERIOUS EFFECT
 				if vocabulary[effect] > vocabulary[maxeffect]:
 					maxeffect = effect
-	if debug:
-		print maxeffect
+	if debug: print maxeffect
 	return(maxeffect)
 
 # ETRACT THE MOST DELETERIOUS MUTATIONS IN A GENE
@@ -128,7 +127,7 @@ def main():
 		if (debug): print vcf_file
 		vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
 		sample = vcfread.samples[0]
-		print sample
+		if (debug): print sample
 		df[sample] = {}
 
 		# FOR EACH GENE OF INTREST
@@ -140,7 +139,6 @@ def main():
 			if (debug):
 				print(thisgene)
 
-			print(thisgene)
 			# FOR EACH TUMOR SAMPLE
 			vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
 
@@ -177,10 +175,13 @@ def main():
 		#print(sample, df[sample])
 		print "Sample\t"+'\t'.join(df[sample].keys())
 
-
+	print "##############################"
 	for sp in df:
 		print sp+'\t'+'\t'.join(df[sp].values())
+	print "##############################"
+	df.to_csv(options.outdir+"/"+"MutationOverview.txt",sep='\t')
 
+	
 
 
 # -------------------------------------------------
