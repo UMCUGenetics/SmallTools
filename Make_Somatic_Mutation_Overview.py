@@ -204,33 +204,3 @@ if __name__ == '__main__':
 print("DONE")
 
 # -------------------------------------------------
-
-def test():
-	for j in range(0, len(gts)):
-		effect = "None"
-		if gts[j] == "0/0":
-			effect = "clean"
-
-		if gts[j] == "0/1" or gts[j] == "1/1":
-			effect = posdict[i]["Effects"][0]
-
-		if gts[j] == "0/2" or gts[j] == "2/2":
-			effect = posdict[i]["Effects"][1]
-
-		if gts[j] == "1/2":
-			print("1/2 detected: ",i,j)
-			effect = posdict[i]["Effects"][1]
-			# FIXME
-
-		if vocabulary[effect] > vocabulary[varcount[j]]:
-			varcount[j] = effect
-
-	measured = [x!="None" for x in varcount]
-	affected = [x in toselect for x in varcount ]
-	samplenames = list(gtdf.columns.values)
-	tumors = ["R" not in x for x in samplenames]
-	newdat = dict(zip(samplenames, varcount))
-	df[thisgene[3]] = pd.Series(newdat)
-
-	print(df)
-	df.to_csv("MutationOverview.txt",sep='\t')
