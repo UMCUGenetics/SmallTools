@@ -89,6 +89,7 @@ write.table(num_gentyp, file=paste(project,panel,"NumGenotypes.txt",sep="_"), se
 NAcount <- rowSums(is.na(num_gentyp))
 remove <- names(NAcount[NAcount>=15])
 clean_num_gentyp <- num_gentyp[!rownames(num_gentyp) %in% remove, ]
+colnames(clean_num_gentyp) <- colnames(num_gentyp)
 
 TAD.dist    <- dist(clean_num_gentyp, method="manhattan", diag=FALSE, upper=FALSE)
 TAD.cluster <- hclust(TAD.dist, method="average", members=NULL)
