@@ -1,6 +1,4 @@
 require(optparse)
-require(VariantAnnotation)
-require(ggplot2)
 #-------------------------------------------------------------------------------------------------------------------------#
 options <- list(
 		make_option(c("-v", "--verbose"),	action="store_true",	default=TRUE,		help="Print extra output [default]"),
@@ -14,6 +12,14 @@ options <- list(
 		make_option("--passonly",						type="logical", 	default=TRUE,			help="if TRUE, ignore non PASS SVs [default %default]", metavar="logical"),
 		make_option("--ignoretype",					type="logical", 	default=TRUE,			help="!TODO! if TRUE, ignore SV types [default %default] [not implemented yet]", metavar="logical")
 )
+
+parser <- OptionParser(usage = "%prog [options]", option_list=options)
+arguments <- parse_args(parser, args=commandArgs(trailingOnly=TRUE),	positional_arguments=FALSE)
+print length(arguments)
+#-------------------------------------------------------------------------------------------------------------------------#
+
+require(VariantAnnotation)
+require(ggplot2)
 #TODO Add SV type aware code so we can use the ignoretype flag
 #-------------------------------------------------------------------------------------------------------------------------#
 # FUNCTIONS
@@ -55,8 +61,7 @@ process_manta_vcf <- function(vcffile) {
 }
 
 #-------------------------------------------------------------------------------------------------------------------------#
-parser <- OptionParser(usage = "%prog [options]", option_list=options)
-arguments <- parse_args(parser, args=commandArgs(trailingOnly=TRUE),	positional_arguments=FALSE)
+
 
 samplevcf <- readVcf(arguments$sample, arguments$reference)
 sample <- process_manta_vcf(samplevcf)
