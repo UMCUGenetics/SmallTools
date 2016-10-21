@@ -15,7 +15,10 @@ options <- list(
 
 parser <- OptionParser(usage = "%prog [options]", option_list=options)
 arguments <- parse_args(parser, args=commandArgs(trailingOnly=TRUE),	positional_arguments=FALSE)
-print(length(arguments))
+if (length(arguments) <= 6) {
+	print(options)
+	exit(1)
+}
 #-------------------------------------------------------------------------------------------------------------------------#
 
 require(VariantAnnotation)
