@@ -4,7 +4,7 @@ import os
 from optparse import OptionParser
 
 parser = OptionParser()
-parser.add_option("--vcf",	dest="vcf_file",     help="Path to VCF to convert",       default=False)
+parser.add_option("--vcf",	dest="vcf_file",     help="Path to VCF to convert",       default="")
 #parser.add_option("--conf",	dest="config_file",  help="Path to DataBase config file", default=False)
 (options, args) = parser.parse_args()
 
