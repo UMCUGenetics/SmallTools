@@ -1,8 +1,7 @@
 #!/usr/local/bin/python
-
 #fix freebayes header
-
 import os
+import glob
 from optparse import OptionParser
 # -------------------------------------------------
 parser = OptionParser()
