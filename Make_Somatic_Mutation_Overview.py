@@ -25,7 +25,8 @@ parser.add_option("--dp",	dest="mindepth",	help="Minumum read depth to consider 
 parser.add_option("--af",	dest="minvaf",		help="Minumum variant allele fraction",			default=0.25)
 parser.add_option("--pf",	dest="popfreq",		help="Maximum popultaion frequency",			default=0.05)
 
-parser.add_option("--debug",	dest="debug",		help="Flag for debug logging)",				default=False)
+parser.add_option("--debug",	dest="debug",		help="Flag for debug logging",				default=False)
+parser.add_option("--format",	dest="format",		help="VCF output format [GATK/FREEB/..]",				default="GATK")
 (options, args) = parser.parse_args()
 # -------------------------------------------------
 
@@ -34,6 +35,8 @@ toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 # -------------------------------------------------
 debug = options.debug
+DEPTH_KEY="AD"
+VAF_KEY="AD"
 # -------------------------------------------------
 def check_arguments():
 	if not os.path.exists(options.vcfdir):
@@ -47,6 +50,15 @@ def check_arguments():
 		except OSError:
 			print("Invalid / unable to create, output folder %s"%(options.outdir))
 			return False
+
+	if options.format is "GATK":
+		DEPTH_KEY="AD"
+		VAF_KEY="AD"
+
+	if options.format is "FREEB":
+		DEPTH_KEY = "DP"
+		VAF_KEY = "DPR"
+
 
 	print("Running with the following settings:")
 	print("------------------------------------")
@@ -148,21 +160,27 @@ def main():
 			# FILTER NON-QC RECORDS
 			for vcf_record in vcf_records:
 				#print vcf_record
+
+				#CHEK IF AD FIELD PRESENT
+				if not DEPTH_KEY in vcf_record.genotype(sample):
+					print("Error, key not found "+DEPTH_KEY)
+					continue
+
 				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
-				if isinstance(vcf_record.genotype(sample)['AD'], int):
-					#if vcf_record.genotype(sample)['AD'] < options.mindepth:
+				if VAF_KEY=="AD" and isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
 					# IGNORE SINGLE AD VALUE SAMPLES
 					continue
-				if sum(vcf_record.genotype(sample)['AD']) < int(options.mindepth):
+
+				# SKIP LOW DEPTH POSITIONS
+				if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
 					continue
 
 				# CHECK VAF
-				if debug: print sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])
-				if (sum(vcf_record.genotype(sample)['AD'][1:])*1.0/sum(vcf_record.genotype(sample)['AD'])) < float(options.minvaf):
+				if debug: print sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])
+				if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])) < float(options.minvaf):
 					continue
 
 				# CHECK POPULATION FREQUENCY
-				# print find_popfreq(vcf_record)
 				if max(find_popfreq(vcf_record)) > float(options.popfreq):
 					continue
 
@@ -190,7 +208,7 @@ def main():
 	#print "##############################"
 	outfile.close()
 
-	
+
 
 
 # -------------------------------------------------
