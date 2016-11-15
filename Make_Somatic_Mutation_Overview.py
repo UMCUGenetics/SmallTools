@@ -177,16 +177,14 @@ def main():
 			effects = []
 			# FILTER NON-QC RECORDS
 			for vcf_record in vcf_records:
-				#print vcf_record
-
 				#CHEK IF AD FIELD PRESENT
-
 				#if not DEPTH_KEY in vcf_record.genotype(sample):
 				#	print("Error, key not found "+DEPTH_KEY)
 				#	continue
 
 				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
 				if VAF_KEY=="AD":
+					if debug: print VAF_KEY
 					if isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
 						# IGNORE SINGLE AD VALUE SAMPLES
 						continue
