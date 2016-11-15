@@ -146,7 +146,12 @@ def main():
 		if options.format is "FREEB":
 			sample = vcfread.samples[1]
 
-		if (debug): print sample
+		if (debug):
+			print vcfread.samples
+			print sample
+		if not sample:
+			print "Error, no sample found "+vcf_file
+			continue
 		df[sample] = {}
 
 		# FOR EACH GENE OF INTREST
