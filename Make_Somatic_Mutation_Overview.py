@@ -138,9 +138,13 @@ def main():
 	df = {}
 
 	for vcf_file in file_list:
-		if (debug): print vcf_file
+		if (debug):
+			print "------"
+			print vcf_file
 		vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
 		sample = False
+
+		if (debug): print options.format
 		if options.format is "GATK":
 			sample = vcfread.samples[0]
 		if options.format is "FREEB":
@@ -149,6 +153,7 @@ def main():
 		if (debug):
 			print vcfread.samples
 			print sample
+
 		if not sample:
 			print "Error, no sample found "+vcf_file
 			continue
