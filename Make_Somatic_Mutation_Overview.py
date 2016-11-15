@@ -167,8 +167,7 @@ def main():
 				continue
 			thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 
-			if (debug):
-				print(thisgene)
+			if (debug):	print(thisgene)
 
 			# FOR EACH TUMOR SAMPLE
 			vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
@@ -179,7 +178,8 @@ def main():
 				#print vcf_record
 
 				#CHEK IF AD FIELD PRESENT
-				if debug: print vcf_record.genotype(sample)
+				if debug: print "-- "+vcf_record.genotype(sample)
+
 				if not DEPTH_KEY in vcf_record.genotype(sample):
 					print("Error, key not found "+DEPTH_KEY)
 					continue
