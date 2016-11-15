@@ -6,6 +6,7 @@ from optparse import OptionParser
 # -------------------------------------------------
 parser = OptionParser()
 parser.add_option("--vcfdir",	dest="vcfdir",		help="Path to directory containing VCF files",		default=False)
+(options, args) = parser.parse_args()
 # -------------------------------------------------
 
 SAMPLEHEADER="#CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	%s	%s\n"
