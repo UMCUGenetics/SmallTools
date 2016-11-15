@@ -35,10 +35,13 @@ toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 # -------------------------------------------------
 debug = options.debug
-DEPTH_KEY="AD"
-VAF_KEY="AD"
+DEPTH_KEY=""
+VAF_KEY=""
 # -------------------------------------------------
 def check_arguments():
+	global DEPTH_KEY
+	global VAF_KEY
+
 	if not os.path.exists(options.vcfdir):
 		print("Invalid BAM folder %s"%(options.vcfdir))
 		return False
@@ -131,6 +134,9 @@ def zip_and_index(vcffile):
 # -------------------------------------------------
 
 def main():
+	global DEPTH_KEY
+	global VAF_KEY
+	
 	file_list = glob.glob(os.path.join(options.vcfdir, "*.vcf"))
 	for vcf_file in file_list:
 		zip_and_index(vcf_file)
