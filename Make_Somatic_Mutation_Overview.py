@@ -142,12 +142,13 @@ def main():
 			print "------"
 			print vcf_file
 		vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
-		sample = False
 
+		sample = False
 		if (debug): print options.format
 		if options.format is "GATK":
 			sample = vcfread.samples[0]
-		if options.format is "FREEB":
+		elif options.format is "FREEB":
+			print "++ "+vcfread.samples[1]
 			sample = vcfread.samples[1]
 
 		if (debug):
@@ -157,6 +158,7 @@ def main():
 		if not sample:
 			print "Error, no sample found "+vcf_file
 			continue
+
 		df[sample] = {}
 
 		# FOR EACH GENE OF INTREST
