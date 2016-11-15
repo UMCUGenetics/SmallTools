@@ -140,7 +140,12 @@ def main():
 	for vcf_file in file_list:
 		if (debug): print vcf_file
 		vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
-		sample = vcfread.samples[0]
+		sample = False
+		if options.format is "GATK":
+			sample = vcfread.samples[0]
+		if options.format is "FREEB":
+			sample = vcfread.samples[1]
+
 		if (debug): print sample
 		df[sample] = {}
 
