@@ -63,6 +63,8 @@ def check_arguments():
 	print("Running with the following settings:")
 	print("------------------------------------")
 	print(options)
+	print("DEPTH FIELD:"+DEPTH_KEY)
+	print("ALLELE FIELD:"+VAF_KEY)
 	print("------------------------------------")
 	return True
 
@@ -184,9 +186,10 @@ def main():
 				#	continue
 
 				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
-				if VAF_KEY=="AD" and isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
-					# IGNORE SINGLE AD VALUE SAMPLES
-					continue
+				if VAF_KEY=="AD":
+					if isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
+						# IGNORE SINGLE AD VALUE SAMPLES
+						continue
 
 				# SKIP LOW DEPTH POSITIONS
 				if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
