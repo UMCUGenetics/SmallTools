@@ -25,7 +25,7 @@ def fix_header(vcffile):
 			fwriter.write(line)
 			if line.startswith("##commandline="):
 				##commandline="/home/cog/pprins/run6/bin/freebayes -f /hpc/cog_bioinf/GENOMES/human_GATK_GRCh37/GRCh37_gatk.fasta -C 3 -t /hpc/cog_bioinf/ENRICH/kinome_design_SS_V2_110811.bed --pooled-discrete --genotype-qualities --min-coverage 5 --no-indels --no-mnps --no-complex /home/cog/pprins/run6/data/freebayes/merged_MBC019R_F3_20130528_rmdup_kinome_design_SS_V2_110811.bam /home/cog/pprins/run6/data/freebayes/merged_MBC019T_F3_20130528_rmdup_kinome_design_SS_V2_110811.bam""
-				items = line.strip().split(" ")[-2:-1]
+				items = line.strip().split(" ")[-2:]
 				print items
 				samples = [k.split("_")[1] for k in items]
 				print samples
