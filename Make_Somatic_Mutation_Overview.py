@@ -178,11 +178,10 @@ def main():
 				#print vcf_record
 
 				#CHEK IF AD FIELD PRESENT
-				if debug: print "-- "+vcf_record.genotype(sample)
 
-				if not DEPTH_KEY in vcf_record.genotype(sample):
-					print("Error, key not found "+DEPTH_KEY)
-					continue
+				#if not DEPTH_KEY in vcf_record.genotype(sample):
+				#	print("Error, key not found "+DEPTH_KEY)
+				#	continue
 
 				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
 				if VAF_KEY=="AD" and isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
