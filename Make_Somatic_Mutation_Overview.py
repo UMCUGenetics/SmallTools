@@ -136,7 +136,7 @@ def zip_and_index(vcffile):
 def main():
 	global DEPTH_KEY
 	global VAF_KEY
-	
+
 	file_list = glob.glob(os.path.join(options.vcfdir, "*.vcf"))
 	for vcf_file in file_list:
 		zip_and_index(vcf_file)
@@ -189,15 +189,14 @@ def main():
 				#	continue
 
 				# CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
-				if VAF_KEY=="AD":
-					if debug: print VAF_KEY
-					if isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
-						# IGNORE SINGLE AD VALUE SAMPLES
+				if isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
+					# SKIP LOW DEPTH POSITIONS
+					if vcf_record.genotype(sample)[DEPTH_KEY] < int(options.mindepth):
 						continue
-
-				# SKIP LOW DEPTH POSITIONS
-				if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
-					continue
+				else:
+					# SKIP LOW DEPTH POSITIONS
+					if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
+						continue
 
 				# CHECK VAF
 				if debug: print sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])
