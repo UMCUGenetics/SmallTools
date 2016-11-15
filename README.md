@@ -1,8 +1,7 @@
 Small tools for genetics research 
 ========
-Here I provide 'production' and development versions of the code I use in my research.
-I hope they are of use in your research!  
-If you have suggestions or improvements let me know.  
+Here we provide some 'near production' and development versions of the code we use in our genetics research.
+If you have suggestions or improvements let us know.  
 Tools are developed according to the [Small tools Manifesto](https://github.com/pjotrp/bioinformatics) principles.
 
 ---
