@@ -178,7 +178,12 @@ def main():
 			if (debug):	print(thisgene)
 
 			# FOR EACH TUMOR SAMPLE
-			vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
+			vcf_records=False
+			try:
+				vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
+			except ValueError as e:
+				df[sample][thisgene["SYMBOL"]] = "None"
+				continue
 
 			effects = []
 			# FILTER NON-QC RECORDS
