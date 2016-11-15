@@ -179,6 +179,7 @@ def main():
 				#print vcf_record
 
 				#CHEK IF AD FIELD PRESENT
+				if debug: print vcf_record.genotype(sample)
 				if not DEPTH_KEY in vcf_record.genotype(sample):
 					print("Error, key not found "+DEPTH_KEY)
 					continue
