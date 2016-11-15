@@ -51,11 +51,11 @@ def check_arguments():
 			print("Invalid / unable to create, output folder %s"%(options.outdir))
 			return False
 
-	if options.format is "GATK":
+	if options.format == "GATK":
 		DEPTH_KEY="AD"
 		VAF_KEY="AD"
 
-	if options.format is "FREEB":
+	if options.format == "FREEB":
 		DEPTH_KEY = "DP"
 		VAF_KEY = "DPR"
 
@@ -145,9 +145,9 @@ def main():
 
 		sample = False
 		if (debug): print options.format
-		if options.format is "GATK":
+		if options.format == "GATK":
 			sample = vcfread.samples[0]
-		elif options.format is "FREEB":
+		elif options.format == "FREEB":
 			print "++ "+vcfread.samples[1]
 			sample = vcfread.samples[1]
 
