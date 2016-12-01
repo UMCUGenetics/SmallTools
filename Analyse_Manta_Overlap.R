@@ -1,4 +1,4 @@
-require(optparse)
+require(optparse, lib.loc="/hpc/local/CentOS7/cog_bioinf/R_libs/3.2.2/")
 #-------------------------------------------------------------------------------------------------------------------------#
 options <- list(
 		make_option(c("-v", "--verbose"),	action="store_true",	default=TRUE,		help="Print extra output [default]"),
