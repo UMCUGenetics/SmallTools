@@ -1,4 +1,4 @@
-require(optparse, lib.loc="/hpc/local/CentOS7/cog_bioinf/R_libs/3.2.2/")
+require(optparse, lib.loc="/hpc/local/CentOS7/cog/R_libs/3.2.2")
 #-------------------------------------------------------------------------------------------------------------------------#
 options <- list(
 		make_option(c("-v", "--verbose"),	action="store_true",	default=TRUE,		help="Print extra output [default]"),
@@ -21,8 +21,8 @@ if (length(arguments) <= 6) {
 }
 #-------------------------------------------------------------------------------------------------------------------------#
 
-require(VariantAnnotation)
-require(ggplot2)
+require(VariantAnnotation, lib.loc="/hpc/local/CentOS7/cog/R_libs/3.2.2")
+require(ggplot2, lib.loc="/hpc/local/CentOS7/cog/R_libs/3.2.2")
 #TODO Add SV type aware code so we can use the ignoretype flag
 #-------------------------------------------------------------------------------------------------------------------------#
 # FUNCTIONS
