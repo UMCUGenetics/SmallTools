@@ -118,7 +118,7 @@ if (arguments$passonly) {
 cleanname <- gsub(".gz", "", arguments$sample)
 cleanname <- gsub(".vcf", "", cleanname)
 # WRITE RESULTS TO VCF FILE
-outvcf <- paste0(cleanname,"_FilteredFor_",gsub(".gz", "",arguments$control))
+outvcf <- paste0(arguments$ouput,"/",cleanname,"_FilteredFor_",gsub(".gz", "",arguments$control))
 writeVcf(samplevcf[selected_events,], outvcf)
 
 # PLOT THE FILTERING OVERVIEW
