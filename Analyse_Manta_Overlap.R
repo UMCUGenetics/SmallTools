@@ -46,7 +46,7 @@ calc_dp <- function(x) {
 # Process Manta file into a more usable format for filtering purposes
 process_manta_vcf <- function(vcffile) {
 	#print(head(rowRanges(vcffile)))
-	trim(vcffile)
+	print(head(trim(vcffile)))
 	vcfdf <- data.frame(rowRanges(vcffile))
 	#print(head(vcfdf))
 	
