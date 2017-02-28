@@ -259,6 +259,7 @@ def main():
         for gene in rdf[sample]:
             thisrec = rdf[sample][gene]["REC"]
             proteffect = thisrec.INFO["ANN"][rdf[sample][gene]["LOC"]].split('|')[11]
+            print(thisrec.REF)
             outfile.write("\t".join([gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT)), str(thisrec.REF), thisrec.ALT[0]]))
     #print "##############################"
     outfile.close()
