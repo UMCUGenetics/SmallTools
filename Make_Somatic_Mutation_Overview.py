@@ -159,15 +159,15 @@ def main():
         if options.format == "GATK":
             sample = vcfread.samples[0]
         elif options.format == "FREEB":
-            print "++ "+vcfread.samples[1]
+            if (debug): print("++ "+vcfread.samples[1])
             sample = vcfread.samples[1]
 
         if (debug):
-            print vcfread.samples
-            print sample
+            print(vcfread.samples)
+            print(sample)
 
         if not sample:
-            print "Error, no sample found "+vcf_file
+            print("Error, no sample found "+vcf_file)
             continue
 
         df[sample] = {}
@@ -232,7 +232,10 @@ def main():
                 if eff in toselect:
                     df[sample][thisgene["SYMBOL"]] = eff
                     if eff in mapping:
-                        rdf[sample][thisgene["SYMBOL"]] = records[loc]
+                        rdf[sample][thisgene["SYMBOL"]] = {}
+                        rdf[sample][thisgene["SYMBOL"]]["REC"] = records[loc]
+                        rdf[sample][thisgene["SYMBOL"]]["EFF"] = eff
+                        rdf[sample][thisgene["SYMBOL"]]["LOC"] = loc
                 else:
                     df[sample][thisgene["SYMBOL"]] = "None"
 
@@ -254,8 +257,9 @@ def main():
     #print "##############################"
     for sample in rdf:
         for gene in rdf[sample]:
-            proteffect = rdf[sample][gene].INFO["ANN"].split('|')[11]
-            outfile.write("\t".join(gene, sample, proteffect, mapping[find_effects(rdf[sample][gene])],  rdf[sample][gene].CHROM, rdf[sample][gene].POS, rdf[sample][gene].POS+len(rdf[sample][gene].ALT), rdf[sample][gene].REF, rdf[sample][gene].ALT))
+            thisrec = rdf[sample][gene]["REC"]
+            proteffect = thisrec.INFO["ANN"][rdf[sample][gene]["LOC"]].split('|')[11]
+            outfile.write("\t".join(gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], thisrec.CHROM, thisrec.POS, thisrec.POS+len(thisrec.ALT), thisrec.REF, thisrec.ALT))
     #print "##############################"
     outfile.close()
 
