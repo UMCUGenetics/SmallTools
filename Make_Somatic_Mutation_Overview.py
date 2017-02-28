@@ -264,6 +264,7 @@ def main():
                     proteffect=pred.split("|")[10]
                     break
             if (debug):
+                print(thisrec.INFO["ANN"])
                 print(gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]))
             outfile.write("\t".join([gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0])] )+"\n")
     #print "##############################"
