@@ -235,7 +235,6 @@ def main():
                         rdf[sample][thisgene["SYMBOL"]] = {}
                         rdf[sample][thisgene["SYMBOL"]]["REC"] = records[loc]
                         rdf[sample][thisgene["SYMBOL"]]["EFF"] = eff
-                        rdf[sample][thisgene["SYMBOL"]]["LOC"] = loc
                 else:
                     df[sample][thisgene["SYMBOL"]] = "None"
 
@@ -258,9 +257,14 @@ def main():
     for sample in rdf:
         for gene in rdf[sample]:
             thisrec = rdf[sample][gene]["REC"]
-            proteffect = thisrec.INFO["ANN"][rdf[sample][gene]["LOC"]].split('|')[11]
-            print(thisrec.REF)
-            outfile.write("\t".join([gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT)), str(thisrec.REF), thisrec.ALT[0]]))
+
+            proteffect=None
+            for pred in thisrec.INFO["ANN"]:
+                if rdf[sample][gene]["EFF"] == pred.split("|")[1]:
+                    proteffect=pred.split("|")[10]
+                    break
+
+            outfile.write("\t".join([gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0])] )+"\n")
     #print "##############################"
     outfile.close()
 
