@@ -256,7 +256,7 @@ def main():
     outfile.close()
 
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
-    outfile.write("Sample\t"+'\t'.join(lolipop)+"\n")
+    outfile.write('\t'.join(lolipop)+"\n")
     #print "##############################"
     for samplename in rdf:
         for gene in rdf[samplename]:
