@@ -155,14 +155,16 @@ def main():
         vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
 
         sample = False
+        samplename = False
         if (debug): print options.format
         if options.format == "GATK":
             sample = vcfread.samples[0]
+            samplename = sample
         elif options.format == "FREEB":
             if (debug): print("++ "+vcfread.samples[1])
-            #sample = vcfread.samples[1]
-            sample = vcf_file.split(".")[1].split("_")[1]
-            if (debug): print("-- "+sample)
+            sample = vcfread.samples[1]
+            samplename = vcf_file.split(".")[1].split("_")[1]
+            if (debug): print("-- "+samplename)
 
         if (debug):
             print(vcfread.samples)
@@ -172,8 +174,8 @@ def main():
             print("Error, no sample found "+vcf_file)
             continue
 
-        df[sample] = {}
-        rdf[sample] = {}
+        df[samplename] = {}
+        rdf[samplename] = {}
 
         # FOR EACH GENE OF INTREST
         for gene in genelist:
@@ -188,7 +190,7 @@ def main():
             try:
                 vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
             except ValueError as e:
-                df[sample][thisgene["SYMBOL"]] = "None"
+                df[samplename][thisgene["SYMBOL"]] = "None"
                 continue
 
             effects = []
@@ -227,25 +229,25 @@ def main():
                 records.append(vcf_record)
 
             if len(effects) <= 0:
-                df[sample][thisgene["SYMBOL"]] = "None"
+                df[samplename][thisgene["SYMBOL"]] = "None"
             else:
                 loc = select_maximum_effect(effects)
                 eff = effects[loc]
                 if eff in toselect:
-                    df[sample][thisgene["SYMBOL"]] = eff
+                    df[samplename][thisgene["SYMBOL"]] = eff
                     if eff in mapping:
-                        rdf[sample][thisgene["SYMBOL"]] = {}
-                        rdf[sample][thisgene["SYMBOL"]]["REC"] = records[loc]
-                        rdf[sample][thisgene["SYMBOL"]]["EFF"] = eff
+                        rdf[samplename][thisgene["SYMBOL"]] = {}
+                        rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[loc]
+                        rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
                 else:
-                    df[sample][thisgene["SYMBOL"]] = "None"
+                    df[samplename][thisgene["SYMBOL"]] = "None"
 
 
         #print(sample, df[sample])
-        if (debug): print "Sample\t"+'\t'.join(df[sample].keys())
+        if (debug): print "Sample\t"+'\t'.join(df[samplename].keys())
 
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
-    outfile.write("Sample\t"+'\t'.join(df[sample].keys())+"\n")
+    outfile.write("Sample\t"+'\t'.join(df[samplename].keys())+"\n")
     #print "##############################"
     for sp in df:
         outfile.write(sp+'\t'+'\t'.join(df[sp].values())+"\n")
@@ -256,19 +258,19 @@ def main():
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
     outfile.write("Sample\t"+'\t'.join(lolipop)+"\n")
     #print "##############################"
-    for sample in rdf:
-        for gene in rdf[sample]:
-            thisrec = rdf[sample][gene]["REC"]
+    for samplename in rdf:
+        for gene in rdf[samplename]:
+            thisrec = rdf[samplename][gene]["REC"]
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
-                if rdf[sample][gene]["EFF"] in pred.split("|")[1].split("&"):
+                if rdf[samplename][gene]["EFF"] in pred.split("|")[1].split("&"):
                     proteffect=pred.split("|")[10]
                     break
             if (debug):
                 print(thisrec.INFO["ANN"])
-                print(gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]))
-            outfile.write("\t".join([gene, sample, proteffect, mapping[rdf[sample][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0])] )+"\n")
+                print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]))
+            outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0])] )+"\n")
     #print "##############################"
     outfile.close()
 
