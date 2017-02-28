@@ -260,7 +260,7 @@ def main():
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
-                if rdf[sample][gene]["EFF"] == pred.split("|")[1]:
+                if rdf[sample][gene]["EFF"] == pred.split("|")[1].split("&"):
                     proteffect=pred.split("|")[10]
                     break
             if (debug):
