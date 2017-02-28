@@ -160,7 +160,9 @@ def main():
             sample = vcfread.samples[0]
         elif options.format == "FREEB":
             if (debug): print("++ "+vcfread.samples[1])
-            sample = vcfread.samples[1]
+            #sample = vcfread.samples[1]
+            sample = vcf_file.split(".")[1].split("_")[1]
+            if (debug): print("-- "+sample)
 
         if (debug):
             print(vcfread.samples)
