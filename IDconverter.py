@@ -46,6 +46,8 @@ def generic_json_request_handler(server, ext):
     return(r.json())
 
 def get_kegg_genes(pathway):
+    #if args.debug:
+    #    print("Parsing pathway: "+pathway)
     server="http://togows.org"
     ext="/entry/kegg-pathway/"+pathway+"/genes.json"
     return(generic_json_request_handler(server, ext)[0])
@@ -53,6 +55,11 @@ def get_kegg_genes(pathway):
 def get_ens_orthologues(ensid):
     server = "https://rest.ensembl.org"
     ext = "/homology/id/"+ensid+"?format=condensed;type=orthologues"
+    return(generic_json_request_handler(server, ext)['data'][0])
+
+def map_ens_to_species(ensid, targettaxon):
+    server = "https://rest.ensembl.org"
+    ext = "/homology/id/"+ensid+"?format=condensed;type=orthologues;target_taxon="+targettaxon
     return(generic_json_request_handler(server, ext)['data'][0])
 
 def get_sym_orthologues(symbol, species):
@@ -117,7 +124,8 @@ def fill_kegg_colors(genedata, fulldata, colors):
             ofile = args.outdir+condition+"_mappings.json"
             mappingdata={}
             if not os.path.isfile(ofile):
-                mappingdata = find_symbols(species, genedata[species][condition])
+                #print(genedata[species][condition])
+                mappingdata = find_symbols(genedata[species][condition], species)
                 with open(ofile, 'w') as outfile:
                     json.dump(mappingdata, outfile)
             else:
