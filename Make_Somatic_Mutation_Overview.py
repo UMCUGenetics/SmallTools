@@ -198,8 +198,10 @@ def main():
             # FILTER NON-QC RECORDS
             for vcf_record in vcf_records:
                 #CHEK IF AD FIELD PRESENT
-                if not DEPTH_KEY in vcf_record.genotype(sample):
-                    if debug: print("Error, key not found "+DEPTH_KEY)
+                try:
+                    dataitem = vcf_record.genotype(sample)
+                    #if debug: print(dataitem)
+                except TypeError as e:
                     continue
 
                 # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
