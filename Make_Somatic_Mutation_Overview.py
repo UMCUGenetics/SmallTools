@@ -156,7 +156,7 @@ def main():
 
         sample = False
         samplename = False
-        if (debug): print options.format
+        if (debug): print(options.format)
         if options.format == "GATK":
             sample = vcfread.samples[0]
             samplename = sample
