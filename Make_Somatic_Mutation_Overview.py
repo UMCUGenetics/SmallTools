@@ -51,7 +51,7 @@ def check_arguments():
     if not os.path.exists(options.outdir):
         print("Creating output folder %s"%(options.outdir))
         try:
-            os.makedir(options.outdir)
+            os.mkdir(options.outdir)
         except OSError:
             print("Invalid / unable to create, output folder %s"%(options.outdir))
             return(False)
