@@ -54,15 +54,15 @@ def check_arguments():
             os.makedir(options.outdir)
         except OSError:
             print("Invalid / unable to create, output folder %s"%(options.outdir))
-            return False
+            return(False)
 
     if options.format == "GATK":
         DEPTH_KEY="AD"
         VAF_KEY="AD"
 
     if options.format == "FREEB":
-        DEPTH_KEY = "DP"
-        VAF_KEY = "DPR"
+        DEPTH_KEY="DP"
+        VAF_KEY="DPR"
 
 
     print("Running with the following settings:")
@@ -71,7 +71,7 @@ def check_arguments():
     print("DEPTH FIELD:"+DEPTH_KEY)
     print("ALLELE FIELD:"+VAF_KEY)
     print("------------------------------------")
-    return True
+    return(True)
 
 # -------------------------------------------------
 
@@ -84,7 +84,7 @@ def find_popfreq(vcf_record):
 
     for field in freq_fields:
         if field in vcf_record.INFO:
-            #print vcf_record.INFO[field]
+            #print(vcf_record.INFO[field])
             popfreq.append([float(x) for x in vcf_record.INFO[field]])
 
     #print(popfreq)
@@ -108,15 +108,15 @@ def find_effects(vcf_record):
             if effect not in vocabulary:
                 # A NEW MUTATION EFFECT WAS FOUND
                 if debug:
-                    print "NEW Mutation effect identified:"
-                    print pred
-                    print effect
+                    print("NEW Mutation effect identified:")
+                    print(pred)
+                    print(effect)
 
             else:
                 # STORE THE MOST DELETERIOUS EFFECT
                 if vocabulary[effect] > vocabulary[maxeffect]:
                     maxeffect = effect
-    if debug: print maxeffect
+    if debug: print(maxeffect)
     return(maxeffect)
 
 # ETRACT THE MOST DELETERIOUS MUTATIONS IN A GENE
@@ -150,8 +150,8 @@ def main():
 
     for vcf_file in file_list:
         if (debug):
-            print "------"
-            print vcf_file
+            print("------")
+            print(vcf_file)
         vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
 
         sample = False
@@ -183,7 +183,7 @@ def main():
                 continue
             thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 
-            if (debug):    print(thisgene)
+            if (debug): print(thisgene)
 
             # FOR EACH TUMOR SAMPLE
             vcf_records=False
