@@ -201,7 +201,8 @@ def main():
                 try:
                     dataitem = vcf_record.genotype(sample)
                     #if debug: print(dataitem)
-                except TypeError as e:
+                    aditem = vcf_record.genotype(sample)[DEPTH_KEY]
+                except TypeError, AttributeError as e, a:
                     continue
 
                 # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
