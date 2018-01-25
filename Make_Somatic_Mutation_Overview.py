@@ -21,8 +21,8 @@ parser.add_option("--tabix",    dest="tabix",      help="Path to tabix binary", 
 
 parser.add_option("--t",        dest="nrcpus",     help="Number of CPUs to use per sample",        default=2)
 
-parser.add_option("--dp",       dest="mindepth",   help="Minumum read depth to consider reliable", default=10)
-parser.add_option("--af",       dest="minvaf",     help="Minumum variant allele fraction",         default=0.25)
+parser.add_option("--dp",       dest="mindepth",   help="Minimum read depth to consider reliable", default=10)
+parser.add_option("--af",       dest="minvaf",     help="Minimum variant allele fraction",         default=0.25)
 parser.add_option("--pf",       dest="popfreq",    help="Maximum popultaion frequency",            default=0.05)
 
 parser.add_option("--debug",    dest="debug",      help="Flag for debug logging",                  default=False)
