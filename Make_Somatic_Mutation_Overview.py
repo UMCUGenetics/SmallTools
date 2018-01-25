@@ -207,7 +207,7 @@ def main():
                     # SKIP LOW DEPTH POSITIONS
                     if vcf_record.genotype(sample)[DEPTH_KEY] < int(options.mindepth):
                         continue
-                    if debug: print sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]
+                    if debug: print(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY])
                     # CHECK VAF
                     if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]) < float(options.minvaf):
                         continue
@@ -216,7 +216,7 @@ def main():
                     # SKIP LOW DEPTH POSITIONS
                     if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
                         continue
-                    if debug: print sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])
+                    if debug: print(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY]))
                     # CHECK VAF
                     if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])) < float(options.minvaf):
                         continue
@@ -244,7 +244,7 @@ def main():
 
 
         #print(sample, df[sample])
-        if (debug): print "Sample\t"+'\t'.join(df[samplename].keys())
+        if (debug): print("Sample\t"+'\t'.join(df[samplename].keys()))
 
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
     outfile.write("Sample\t"+'\t'.join(df[samplename].keys())+"\n")
