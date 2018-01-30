@@ -186,6 +186,7 @@ def main():
                 try:
                     vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
                 except ValueError as e:
+                    if debug: print("-> No variants found for gene")
                     df[samplename][thisgene["SYMBOL"]] = "None"
                     continue
 
@@ -206,16 +207,17 @@ def main():
                         # SKIP LOW DEPTH POSITIONS
                         if vcf_record.genotype(sample)[DEPTH_KEY] < int(options.mindepth):
                             continue
-                        if debug: print(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY])
+                        if debug: print("VAF %d" %(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]))
                         # CHECK VAF
                         if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]) < float(options.minvaf):
                             continue
 
                     else:
+                        if debug: print("DEPTH %d" %(vcf_record.genotype(sample)[DEPTH_KEY]))
                         # SKIP LOW DEPTH POSITIONS
                         if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
                             continue
-                        if debug: print(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY]))
+                        if debug: print("VAF %d" %(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])))
                         # CHECK VAF
                         if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])) < float(options.minvaf):
                             continue
