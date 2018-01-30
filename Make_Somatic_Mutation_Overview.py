@@ -170,7 +170,7 @@ def main():
                 sample = vcfread.samples[i+1]
                 samplename = vcf_file.split(".")[1].split("_")[1]
 
-            if (debug): print("-- "+samplename)
+            print("-- "+samplename)
             df[samplename] = {}
             rdf[samplename] = {}
 
@@ -180,7 +180,7 @@ def main():
                     continue
                 thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 
-                if (debug): print(thisgene)
+                print("++ "+thisgene)
                 # FOR EACH TUMOR SAMPLE
                 vcf_records=False
                 try:
@@ -203,7 +203,7 @@ def main():
                     except AttributeError as e:
                         continue
                     if vcf_record.genotype(sample)[DEPTH_KEY] is None:
-                        if debug: print("No DEPTH found for variant: {}".format(vcf_record))
+                        if debug: print("-> No DEPTH found for variant: {}".format(vcf_record))
                         continue
                     if debug: print("DEPTH {}".format(vcf_record.genotype(sample)[DEPTH_KEY]))
 
