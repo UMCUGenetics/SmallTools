@@ -180,7 +180,7 @@ def main():
                     continue
                 thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 
-                print("++ {}".foramt(thisgene))
+                print("++ {}".format(thisgene))
                 # FOR EACH TUMOR SAMPLE
                 vcf_records=False
                 try:
