@@ -194,6 +194,7 @@ def main():
                 records = []
                 # FILTER NON-QC RECORDS
                 for vcf_record in vcf_records:
+
                     # CHEK IF AD FIELD PRESENT
                     try:
                         dataitem = vcf_record.genotype(sample)
@@ -201,6 +202,10 @@ def main():
                         aditem = vcf_record.genotype(sample)[DEPTH_KEY]
                     except AttributeError as e:
                         continue
+                    if vcf_record.genotype(sample)[DEPTH_KEY] is None:
+                        if debug: print("No DEPTH found for variant: {}".format(vcf_record))
+                        continue
+                    if debug: print("DEPTH {}".format(vcf_record.genotype(sample)[DEPTH_KEY]))
 
                     # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
                     if isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
@@ -213,7 +218,6 @@ def main():
                             continue
 
                     else:
-                        if debug: print("DEPTH {}".format(vcf_record.genotype(sample)[DEPTH_KEY]))
                         # SKIP LOW DEPTH POSITIONS
                         if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
                             continue
@@ -226,6 +230,7 @@ def main():
                     if max(find_popfreq(vcf_record)) > float(options.popfreq):
                         continue
 
+                    if debug: print("PASS")
                     effects.append(find_effects(vcf_record))
                     records.append(vcf_record)
 
