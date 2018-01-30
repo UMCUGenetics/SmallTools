@@ -193,7 +193,7 @@ def main():
                 records = []
                 # FILTER NON-QC RECORDS
                 for vcf_record in vcf_records:
-                    #CHEK IF AD FIELD PRESENT
+                    # CHEK IF AD FIELD PRESENT
                     try:
                         dataitem = vcf_record.genotype(sample)
                         #if debug: print(dataitem)
