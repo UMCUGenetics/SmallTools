@@ -89,7 +89,7 @@ def find_popfreq(vcf_record):
 
     for field in freq_fields:
         if field in vcf_record.INFO:
-            #print(vcf_record.INFO[field])
+            if debug: print(vcf_record.INFO[field])
             popfreq.append([float(x) for x in vcf_record.INFO[field]])
 
     #print(popfreq)
