@@ -90,7 +90,12 @@ def find_popfreq(vcf_record):
     for field in freq_fields:
         if field in vcf_record.INFO:
             if debug: print(vcf_record.INFO[field])
-            popfreq.append([float(x) for x in vcf_record.INFO[field]])
+            for x in vcf_record.INFO[field]:
+                if x is None:
+                    popfreq.append(0.0)
+                else:
+                    popfreq.append(float(x))
+
 
     #print(popfreq)
     return(popfreq)
@@ -198,7 +203,7 @@ def main():
                 records = []
                 # FILTER NON-QC RECORDS
                 for vcf_record in vcf_records:
-
+                    if debug: print("** {}".format(vcf_record))
                     # CHEK IF AD FIELD PRESENT
                     try:
                         dataitem = vcf_record.genotype(sample)
