@@ -85,7 +85,7 @@ def check_arguments():
 def find_popfreq(vcf_record):
     popfreq=[0.0]
     #print(vcf_record.INFO)
-    freq_fields = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq"]
+    freq_fields = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
 
     for field in freq_fields:
         if field in vcf_record.INFO:
@@ -232,6 +232,10 @@ def main():
 
                     # CHECK POPULATION FREQUENCY
                     if max(find_popfreq(vcf_record)) > float(options.popfreq):
+                        continue
+
+                    if vcf_record.INFO["MLEAF"] >= 0.4:
+                        if debug: print("SKIPPING due to MLEAF")
                         continue
 
                     if debug: print("PASS")
