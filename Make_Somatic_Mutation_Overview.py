@@ -257,7 +257,7 @@ def main():
                         continue
 
                     PASS = False
-                    log = "++ {}\t{}".format(thisgene,sample)
+                    log = "++ {}\t{}\t{}".format(thisgene,sample,vcf_record)
                     # CHEK IF AD FIELD PRESENT
                     if check_ad(sgenot):
                         log += "\tAD:PASS"
