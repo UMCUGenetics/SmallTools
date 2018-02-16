@@ -271,7 +271,7 @@ def main():
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
                                 log +=":PASS"
-                                log +="\tPOP:{}".format([vcf_record.INFO[rf] for rf in FREQ_FIELDS])
+                                log +="\tPOP:{}".format([vcf_record.INFO[rf] for rf in FREQ_FIELDS if rf in vcf_record.INFO])
                                 # CHECK POPULATION FREQUENCY
                                 if max(find_popfreq(vcf_record)) <= float(options.popfreq):
                                     log += ":PASS"
