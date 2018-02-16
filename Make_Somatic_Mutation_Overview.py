@@ -299,7 +299,7 @@ def main():
                             rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
                     else:
                         df[samplename][thisgene["SYMBOL"]] = "None"
-                if debug: print("** {}\t{}\t{}".format(thisgene, sample, df[samplename][thisgene["SYMBOL"]]))
+                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, sample, df[samplename][thisgene["SYMBOL"]], ",".join(effects)))
 
         # WIRTE OUTPUT
         outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
