@@ -40,6 +40,9 @@ toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 mapping = {"missense_variant":"Missense_Mutation", "disruptive_inframe_deletion":"Frame_Shift_Del", "disruptive_inframe_insertion":"Frame_Shift_Ins", "5_prime_UTR_premature_start_codon_gain_variant":"Nonsense_Mutation", "stop_gained":"Nonsense_Mutation", "nonsense_mediated_decay":"Nonsense_Mutation", "frameshift_variant":"Frame_Shift_???"}
 lolipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele"]
+
+
+FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
 # -------------------------------------------------
 debug = options.debug
 DEPTH_KEY=""
@@ -84,9 +87,7 @@ def check_arguments():
 # Annoation assumed to be in SNPeff formatting
 def find_popfreq(vcf_record):
     popfreq=[0.0]
-    freq_fields = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
-
-    for field in freq_fields:
+    for field in FREQ_FIELDS:
         if field in vcf_record.INFO:
             #if debug: print(vcf_record.INFO[field])
             for x in vcf_record.INFO[field]:
@@ -261,18 +262,22 @@ def main():
                     # CHEK IF AD FIELD PRESENT
                     if check_ad(sgenot):
                         log += "\tAD:PASS"
+                        log += "\tDEPTH:{}".format(vcf_record.genotype(sample)[DEPTH_KEY]))
                         # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
                         if check_depth(sgenot):
-                            log += "\tDEPTH:PASS"
+                            log += ":PASS"
+                            log += "\tVAF:{}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]))
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
-                                log += "\tVAF:PASS"
+                                log +=":PASS"
+                                log +="\tPOP:{}".format([vcf_record.INFO[rf] for rf in FREQ_FIELDS])
                                 # CHECK POPULATION FREQUENCY
                                 if max(find_popfreq(vcf_record)) <= float(options.popfreq):
-                                    log += "\tPOP:PASS"
+                                    log += ":PASS"
+                                    log += "\tMLEAF:{}".format(vcf_record.INFO["MLEAF"])
                                     # CHECK OCCURENCE IN TOTAL POOL
                                     if vcf_record.INFO["MLEAF"] <= 0.4:
-                                        log += "\tMLEAF:PASS"
+                                        log +=":PASS"
                                         PASS = True
 
                     if debug: print(log)
