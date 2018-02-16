@@ -262,11 +262,11 @@ def main():
                     # CHEK IF AD FIELD PRESENT
                     if check_ad(sgenot):
                         log += "\tAD:PASS"
-                        log += "\tDEPTH:{}".format(vcf_record.genotype(sample)[DEPTH_KEY]))
+                        log += "\tDEPTH:{}".format(vcf_record.genotype(sample)[DEPTH_KEY])
                         # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
                         if check_depth(sgenot):
                             log += ":PASS"
-                            log += "\tVAF:{}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]))
+                            log += "\tVAF:{}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY])
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
                                 log +=":PASS"
