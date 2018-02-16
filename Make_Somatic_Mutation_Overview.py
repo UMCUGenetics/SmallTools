@@ -277,7 +277,7 @@ def main():
                                     log += ":PASS"
                                     log += "\tMLEAF:{}".format(vcf_record.INFO["MLEAF"])
                                     # CHECK OCCURENCE IN TOTAL POOL
-                                    if vcf_record.INFO["MLEAF"] <= 0.4:
+                                    if max(vcf_record.INFO["MLEAF"]) <= 0.4:
                                         log +=":PASS"
                                         PASS = True
 
@@ -300,7 +300,7 @@ def main():
                             rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
                     else:
                         df[samplename][thisgene["SYMBOL"]] = "None"
-                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, sample, df[samplename][thisgene["SYMBOL"]], ",".join(effects)))
+                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects)))
 
         # WIRTE OUTPUT
         outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
