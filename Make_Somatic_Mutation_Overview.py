@@ -205,12 +205,13 @@ def main():
             print("------")
             print(vcf_file)
         vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
-        if debug: print(vcfread.samples)
+
+        if (debug): print(vcfread.samples)
+        if (debug): print(options.format)
 
         # FOR EACH SAMPLE
         for i,sample in enumerate(vcfread.samples):
             samplename = False
-            if (debug): print(options.format)
 
             if options.format == "GATK":
                 samplename = sample
@@ -266,7 +267,7 @@ def main():
                         # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
                         if check_depth(sgenot):
                             log += ":PASS"
-                            log += "\tVAF:{}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY])
+                            log += "\tVAF:{}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY]))
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
                                 log +=":PASS"
