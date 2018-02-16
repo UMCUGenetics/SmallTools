@@ -217,11 +217,12 @@ def main():
                 samplename = sample
             elif options.format == "FREEB":
                 if (debug): print("++ "+vcfread.samples[1])
-                sample = vcfread.samples[i+1]
-                samplename = vcf_file.split(".")[1].split("_")[1]
+                samplename = vcfread.samples[i+1]
+                #samplename = vcf_file.split(".")[1].split("_")[1]
             df[samplename] = {}
             rdf[samplename] = {}
 
+        if debug: print(df)
 
         # FOR EACH GENE OF INTREST
         for gene in genelist:
@@ -253,21 +254,21 @@ def main():
                     #CHECK IF SAMPLE GENOTYPE AVAILABLE
                     sgenot = None
                     try:
-                        sgenot = vcf_record.genotype(sample)
+                        sgenot = vcf_record.genotype(samplename)
                     except AttributeError as e:
-                        if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, sample))
+                        if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, samplename))
                         continue
 
                     PASS = False
-                    log = "++ {}\t{}\t{}".format(thisgene,sample,vcf_record)
+                    log = "++ {}\t{}\t{}".format(thisgene,samplename,vcf_record)
                     # CHEK IF AD FIELD PRESENT
                     if check_ad(sgenot):
                         log += "\tAD:PASS"
-                        log += "\tDEPTH:{}".format(vcf_record.genotype(sample)[DEPTH_KEY])
+                        log += "\tDEPTH:{}".format(vcf_record.genotype(samplename)[DEPTH_KEY])
                         # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
                         if check_depth(sgenot):
                             log += ":PASS"
-                            log += "\tVAF:{}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY]))
+                            log += "\tVAF:{}".format(sum(vcf_record.genotype(samplename)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(samplename)[DEPTH_KEY]))
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
                                 log +=":PASS"
@@ -325,7 +326,7 @@ def main():
                         proteffect=pred.split("|")[10]
                         break
                 if (debug):
-                    print("%%\t",thisrec.INFO["ANN"])
+                    #print("%%\t",thisrec.INFO["ANN"])
                     print("%%\t",gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]))
                 outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0])] )+"\n")
         #print "##############################"
