@@ -242,11 +242,10 @@ def main():
 
             # For each variant position within gene
             for vcf_record in vcf_records:
+                effects = []
+                records = []
                 # For each sample
                 for samplename in df:
-                    effects = []
-                    records = []
-
                     #CHECK IF SAMPLE GENOTYPE AVAILABLE
                     sgenot = None
                     try:
