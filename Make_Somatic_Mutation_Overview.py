@@ -240,16 +240,12 @@ def main():
                     df[samplename][thisgene["SYMBOL"]] = "None"
                 continue
 
-            for samplename in df:
-                effects = []
-                records = []
-
-                # FILTER NON-QC RECORDS
-                for vcf_record in vcf_records:
-                    #if debug: print("** {}".format(vcf_record))
-                    #if debug: print("DEPTH {}".format(vcf_record.genotype(sample)[DEPTH_KEY]))
-                    #if debug: print("VAF {}".format(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]))
-                    #if debug: print("SKIPPING due to MLEAF")
+            # For each variant position within gene
+            for vcf_record in vcf_records:
+                # For each sample
+                for samplename in df:
+                    effects = []
+                    records = []
 
                     #CHECK IF SAMPLE GENOTYPE AVAILABLE
                     sgenot = None
@@ -259,6 +255,7 @@ def main():
                         if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, samplename))
                         continue
 
+                    # FILTER NON-QC RECORDS
                     PASS = False
                     log = "++ {}\t{}\t{}".format(thisgene,samplename,vcf_record)
                     # CHEK IF AD FIELD PRESENT
