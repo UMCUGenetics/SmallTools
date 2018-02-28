@@ -35,7 +35,7 @@ parser.add_option("--format",   dest="format",     help="VCF output format [GATK
 # os.system("module load tabix")
 
 # -------------------------------------------------
-vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "splice_region_variant":1.1, "missense_variant":1.5, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
+vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0.5, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "splice_region_variant":1.1, "missense_variant":1.5, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
 toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 mapping = {"missense_variant":"Missense_Mutation", "disruptive_inframe_deletion":"Frame_Shift_Del", "disruptive_inframe_insertion":"Frame_Shift_Ins", "5_prime_UTR_premature_start_codon_gain_variant":"Nonsense_Mutation", "stop_gained":"Nonsense_Mutation", "nonsense_mediated_decay":"Nonsense_Mutation", "frameshift_variant":"Frame_Shift_???"}
@@ -240,10 +240,15 @@ def main():
                     df[samplename][thisgene["SYMBOL"]] = "None"
                 continue
 
+            # Prep containers
+            effects = {}
+            records = {}
+            for samplename in df:
+                effects[samplename] = []
+                records[samplename] = []
+
             # For each variant position within gene
             for vcf_record in vcf_records:
-                effects = []
-                records = []
                 # For each sample
                 for samplename in df:
                     #CHECK IF SAMPLE GENOTYPE AVAILABLE
@@ -280,16 +285,16 @@ def main():
 
                     if debug: print(log)
                     if PASS:
-                        effects.append(find_effects(vcf_record))
-                        records.append(vcf_record)
+                        effects[samplename].append(find_effects(vcf_record))
+                        records[samplename].append(vcf_record)
 
             # ON GENE+SAMPLE LEVEL determine maximum mutation effect
             for samplename in df:
-                if len(effects) <= 0:
+                if len(effects[samplename]) <= 0:
                     df[samplename][thisgene["SYMBOL"]] = "None"
                 else:
-                    loc = select_maximum_effect(effects)
-                    eff = effects[loc]
+                    loc = select_maximum_effect(effects[samplename])
+                    eff = effects[samplename][loc]
                     if eff in toselect:
                         df[samplename][thisgene["SYMBOL"]] = eff
                         if eff in mapping:
