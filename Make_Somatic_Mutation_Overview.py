@@ -284,7 +284,8 @@ def main():
                         effects.append(find_effects(vcf_record))
                         records.append(vcf_record)
 
-                # ON GENE+SAMPLE LEVEL determine maximum mutation effect
+            # ON GENE+SAMPLE LEVEL determine maximum mutation effect
+            for samplename in df:
                 if len(effects) <= 0:
                     df[samplename][thisgene["SYMBOL"]] = "None"
                 else:
