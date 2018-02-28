@@ -299,11 +299,11 @@ def main():
                         df[samplename][thisgene["SYMBOL"]] = eff
                         if eff in mapping:
                             rdf[samplename][thisgene["SYMBOL"]] = {}
-                            rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[loc]
+                            rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[samplename][loc]
                             rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
                     else:
                         df[samplename][thisgene["SYMBOL"]] = "None"
-                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects)))
+                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects[samplename])))
 
         # WIRTE OUTPUT
         outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
