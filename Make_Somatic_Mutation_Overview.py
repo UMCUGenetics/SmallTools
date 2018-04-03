@@ -286,7 +286,7 @@ def main():
                                     log += ":PASS"
                                     log += "\tMLEAF:{}".format(vcf_record.INFO["MLEAF"])
                                     # CHECK OCCURENCE IN TOTAL POOL
-                                    if max(vcf_record.INFO["MLEAF"]) <= 0.4:
+                                    if max(vcf_record.INFO["MLEAF"]) <= 0.20:
                                         log +=":PASS"
                                         PASS = True
 
