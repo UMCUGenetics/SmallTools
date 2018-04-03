@@ -292,10 +292,19 @@ def main():
             for samplename in df:
                 if len(effects[samplename]) <= 0:
                     df[samplename][thisgene["SYMBOL"]] = "None"
+                else:
+                    loc = select_maximum_effect(effects[samplename])
+                    eff = effects[samplename][loc]
+                    if eff in toselect:
+                        df[samplename][thisgene["SYMBOL"]] = eff
+                        if eff in mapping:
+                            rdf[samplename][thisgene["SYMBOL"]] = {}
+                            rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[samplename][loc]
+                            rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
+                    else:
+                        df[samplename][thisgene["SYMBOL"]] = "None"
 
-
-        #print(sample, df[sample])
-        if (debug): print "Sample\t"+'\t'.join(df[samplename].keys())
+                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects[samplename])))
 
 
     # Printing the mutation overview table
@@ -321,17 +330,19 @@ def main():
     for samplename in rdf:
         for gene in rdf[samplename]:
             thisrec = rdf[samplename][gene]["REC"]
-            vaf=sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0/sum(thisrec.genotype(samplename)[DEPTH_KEY])
+            vaf=(sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0)/sum(thisrec.genotype(samplename)[DEPTH_KEY])
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
+                # Look for the first transcript with this effect
                 if rdf[samplename][gene]["EFF"] in pred.split("|")[1].split("&"):
                     proteffect=pred.split("|")[10]
                     break
 
             if (debug):
-                print(thisrec.INFO["ANN"])
+                #print(thisrec.INFO["ANN"])
                 print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), vaf)
+
             outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), str(vaf)])+"\n")
     if debug: print("##############################")
     outfile.close()
