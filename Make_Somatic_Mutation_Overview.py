@@ -275,6 +275,7 @@ def main():
 
                             # add clean if sufficient depth is measured
                             effects[samplename].append("clean")
+                            records[samplename].append(None)
 
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
