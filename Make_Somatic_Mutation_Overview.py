@@ -39,7 +39,7 @@ vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0
 toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 mapping = {"missense_variant":"Missense_Mutation", "disruptive_inframe_deletion":"Frame_Shift_Del", "disruptive_inframe_insertion":"Frame_Shift_Ins", "5_prime_UTR_premature_start_codon_gain_variant":"Nonsense_Mutation", "stop_gained":"Nonsense_Mutation", "nonsense_mediated_decay":"Nonsense_Mutation", "frameshift_variant":"Frame_Shift_???"}
-lolipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele"]
+lolipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele","VAF"]
 
 
 FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
