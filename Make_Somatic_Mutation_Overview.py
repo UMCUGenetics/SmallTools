@@ -24,17 +24,26 @@ parser.add_option("--t",        dest="nrcpus",     help="Number of CPUs to use p
 parser.add_option("--dp",       dest="mindepth",   help="Minimum read depth to consider reliable", default=10)
 parser.add_option("--af",       dest="minvaf",     help="Minimum variant allele fraction",         default=0.25)
 parser.add_option("--pf",       dest="popfreq",    help="Maximum popultaion frequency",            default=0.05)
+parser.add_option("--cf",       dest="cohfreq",    help="Maximum cohort frequency",                default=0.10)
 
 parser.add_option("--debug",    dest="debug",      help="Flag for debug logging",                  default=False)
 parser.add_option("--format",   dest="format",     help="VCF output format [GATK/FREEB/..]",       default="GATK")
 (options, args) = parser.parse_args()
 # -------------------------------------------------
 
-vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "splice_region_variant":1.1, "missense_variant":1.5, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
+# PREP FILES AND ENVIRONMENT
+# for i in *.vcf; do sed -r -i 's/;dbNSFP_clinvar_clnsig=(.+);/;/g' $i; done
+# os.system("module load tabix")
+
+# -------------------------------------------------
+vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0.5, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "splice_region_variant":1.1, "missense_variant":1.5, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
 toselect = [k for k,v in vocabulary.items() if v >= 1.5]
 
 mapping = {"missense_variant":"Missense_Mutation", "disruptive_inframe_deletion":"Frame_Shift_Del", "disruptive_inframe_insertion":"Frame_Shift_Ins", "5_prime_UTR_premature_start_codon_gain_variant":"Nonsense_Mutation", "stop_gained":"Nonsense_Mutation", "nonsense_mediated_decay":"Nonsense_Mutation", "frameshift_variant":"Frame_Shift_???"}
-lolipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele"]
+lolipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele","VAF"]
+
+
+FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
 # -------------------------------------------------
 debug = options.debug
 DEPTH_KEY=""
@@ -79,15 +88,14 @@ def check_arguments():
 # Annoation assumed to be in SNPeff formatting
 def find_popfreq(vcf_record):
     popfreq=[0.0]
-    #print(vcf_record.INFO)
-    freq_fields = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq"]
-
-    for field in freq_fields:
+    for field in FREQ_FIELDS:
         if field in vcf_record.INFO:
-            #print(vcf_record.INFO[field])
-            popfreq.append([float(x) for x in vcf_record.INFO[field]])
-
-    #print(popfreq)
+            #if debug: print(vcf_record.INFO[field])
+            for x in vcf_record.INFO[field]:
+                if x is None:
+                    popfreq.append(0.0)
+                else:
+                    popfreq.append(float(x))
     return(popfreq)
 
 # Determine the most damaging effect of the variant
@@ -133,6 +141,50 @@ def zip_and_index(vcffile):
     if not os.path.exists(vcffile+".gz"+".tbi"):
         os.system(options.tabix+" "+vcffile+".gz")
 
+
+# GENE FORMAT
+# Gene name + location + variants or not
+# VARIANT FORMAT
+# Variant + DEPTH + POP FREQ + MLEAF + EFFECT
+
+def check_ad(sample_vcf):
+    try:
+        ad_item = sample_vcf[DEPTH_KEY]
+    except AttributeError as e:
+        return(False)
+    if sample_vcf[DEPTH_KEY] is None:
+        return(False)
+    return(True)
+
+#sample_vcf == vcf_record.genotype(sample)
+def check_depth(sample_vcf):
+    #single depth field
+    if isinstance(sample_vcf[DEPTH_KEY], int):
+        # SKIP LOW DEPTH POSITIONS
+        if sample_vcf[DEPTH_KEY] < int(options.mindepth):
+            return(False)
+    #multi depth field
+    else:
+        # SKIP LOW DEPTH POSITIONS
+        if sum(sample_vcf[DEPTH_KEY]) < int(options.mindepth):
+            return(False)
+    return(True)
+
+def check_vaf(sample_vcf):
+    #single depth field
+    if isinstance(sample_vcf[DEPTH_KEY], int):
+        # CHECK VAF
+        if (sum(sample_vcf[VAF_KEY][1:])*1.0/sample_vcf[DEPTH_KEY]) < float(options.minvaf):
+            return(False)
+    #multi depth field
+    else:
+        # CHECK VAF
+        if (sum(sample_vcf[VAF_KEY][1:])*1.0/sum(sample_vcf[DEPTH_KEY])) < float(options.minvaf):
+            return(False)
+    return(True)
+
+
+
 # -------------------------------------------------
 
 def main():
@@ -148,133 +200,164 @@ def main():
     df = {}
     rdf= {}
 
+    # FOR ALL VCF FILES
     for vcf_file in file_list:
         if (debug):
             print("------")
             print(vcf_file)
         vcfread = vcf.Reader(open(vcf_file+".gz",'r'), compressed="gz")
 
-        sample = False
-        samplename = False
+        if (debug): print(vcfread.samples)
         if (debug): print(options.format)
-        if options.format == "GATK":
-            sample = vcfread.samples[0]
-            samplename = sample
-        elif options.format == "FREEB":
-            if (debug): print("++ "+vcfread.samples[1])
-            sample = vcfread.samples[1]
-            samplename = vcf_file.split(".")[1].split("_")[1]
-            if (debug): print("-- "+samplename)
 
-        if (debug):
-            print(vcfread.samples)
-            print(sample)
+        # FOR EACH SAMPLE
+        for i,sample in enumerate(vcfread.samples):
+            samplename = False
 
-        if not sample:
-            print("Error, no sample found "+vcf_file)
-            continue
+            if options.format == "GATK":
+                samplename = sample
+            elif options.format == "FREEB":
+                if (debug): print("++ "+vcfread.samples[1])
+                samplename = vcfread.samples[i+1]
+                #samplename = vcf_file.split(".")[1].split("_")[1]
+            df[samplename] = {}
+            rdf[samplename] = {}
 
-        df[samplename] = {}
-        rdf[samplename] = {}
+        if debug: print(df)
 
         # FOR EACH GENE OF INTREST
         for gene in genelist:
+            nr_of_positions = 0
             if len(gene)<=0:
                 continue
             thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 
-            if (debug): print(thisgene)
-
-            # FOR EACH TUMOR SAMPLE
+            #if debug: print(")
             vcf_records=False
             try:
                 vcf_records = vcfread.fetch(thisgene["Chr"], int(thisgene["Start"])-20, int(thisgene["Stop"])+20)
             except ValueError as e:
-                df[samplename][thisgene["SYMBOL"]] = "None"
+                if debug: print("-- {}\tNO RECORDS FOUND".format(thisgene))
+                for samplename in df:
+                    df[samplename][thisgene["SYMBOL"]] = "None"
                 continue
 
-            effects = []
-            records = []
-            # FILTER NON-QC RECORDS
+            # Prep containers
+            effects = {}
+            records = {}
+            for samplename in df:
+                effects[samplename] = []
+                records[samplename] = []
+
+            # For each variant position within gene
             for vcf_record in vcf_records:
-                #CHEK IF AD FIELD PRESENT
-                try:
-                    dataitem = vcf_record.genotype(sample)
-                    #if debug: print(dataitem)
-                    aditem = vcf_record.genotype(sample)[DEPTH_KEY]
-                except AttributeError as e:
-                    continue
-
-                # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
-                if isinstance(vcf_record.genotype(sample)[DEPTH_KEY], int):
-                    # SKIP LOW DEPTH POSITIONS
-                    if vcf_record.genotype(sample)[DEPTH_KEY] < int(options.mindepth):
-                        continue
-                    if debug: print(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY])
-                    # CHECK VAF
-                    if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/vcf_record.genotype(sample)[DEPTH_KEY]) < float(options.minvaf):
+                nr_of_positions += 1
+                # For each sample
+                for samplename in df:
+                    #CHECK IF SAMPLE GENOTYPE AVAILABLE
+                    sgenot = None
+                    try:
+                        sgenot = vcf_record.genotype(samplename)
+                    except AttributeError as e:
+                        if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, samplename))
                         continue
 
-                else:
-                    # SKIP LOW DEPTH POSITIONS
-                    if sum(vcf_record.genotype(sample)[DEPTH_KEY]) < int(options.mindepth):
-                        continue
-                    if debug: print(sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY]))
-                    # CHECK VAF
-                    if (sum(vcf_record.genotype(sample)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(sample)[DEPTH_KEY])) < float(options.minvaf):
-                        continue
+                    # FILTER NON-QC RECORDS
+                    PASS = False
+                    log = "++ {}\t{}\t{}".format(thisgene,samplename,vcf_record)
+                    # CHEK IF AD FIELD PRESENT
+                    if check_ad(sgenot):
+                        log += "\tAD:PASS"
+                        log += "\tDEPTH:{}".format(vcf_record.genotype(samplename)[DEPTH_KEY])
+                        # CHECK TOTAL COVERAGE OF IDENTIFIED ALLELLES
+                        if check_depth(sgenot):
+                            log += ":PASS"
+                            log += "\tVAF:{}".format(sum(vcf_record.genotype(samplename)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(samplename)[DEPTH_KEY]))
 
-                # CHECK POPULATION FREQUENCY
-                if max(find_popfreq(vcf_record)) > float(options.popfreq):
-                    continue
+                            # add clean if sufficient depth is measured
+                            effects[samplename].append("clean")
+                            records[samplename].append(None)
 
-                effects.append(find_effects(vcf_record))
-                records.append(vcf_record)
+                            # CHECK VARIANT ALLELE FREQUENCY
+                            if check_vaf(sgenot):
+                                log +=":PASS"
+                                log +="\tPOP:{}".format([vcf_record.INFO[rf] for rf in FREQ_FIELDS if rf in vcf_record.INFO])
+                                # CHECK POPULATION FREQUENCY
+                                if max(find_popfreq(vcf_record)) <= float(options.popfreq):
+                                    log += ":PASS"
+                                    log += "\tMLEAF:{}".format(vcf_record.INFO["MLEAF"])
+                                    # CHECK OCCURENCE IN TOTAL POOL
+                                    if max(vcf_record.INFO["MLEAF"]) <= float(options.cohfreq):
+                                        log +=":PASS"
+                                        PASS = True
 
-            if len(effects) <= 0:
-                df[samplename][thisgene["SYMBOL"]] = "None"
-            else:
-                loc = select_maximum_effect(effects)
-                eff = effects[loc]
-                if eff in toselect:
-                    df[samplename][thisgene["SYMBOL"]] = eff
-                    if eff in mapping:
-                        rdf[samplename][thisgene["SYMBOL"]] = {}
-                        rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[loc]
-                        rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
-                else:
+                    if debug: print(log)
+                    if PASS:
+                        effects[samplename].append(find_effects(vcf_record))
+                        records[samplename].append(vcf_record)
+
+            # ON GENE+SAMPLE LEVEL determine maximum mutation effect
+            for samplename in df:
+                if len(effects[samplename]) <= 0:
                     df[samplename][thisgene["SYMBOL"]] = "None"
+                else:
+                    loc = select_maximum_effect(effects[samplename])
+                    eff = effects[samplename][loc]
+                    if eff in toselect:
+                        df[samplename][thisgene["SYMBOL"]] = eff
+                        if eff in mapping:
+                            rdf[samplename][thisgene["SYMBOL"]] = {}
+                            rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[samplename][loc]
+                            rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
+                    else:
+                        # check number of 'clean' positions
+                        # if 50% of positions passes DP metric count as clean
+                        if effects[samplename].count("clean") >= (nr_of_positions/2):
+                            df[samplename][thisgene["SYMBOL"]] = "clean"
+                        else:
+                            df[samplename][thisgene["SYMBOL"]] = "None"
+
+                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects[samplename])))
 
 
-        #print(sample, df[sample])
-        if (debug): print("Sample\t"+'\t'.join(df[samplename].keys()))
-
+    # Printing the mutation overview table
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
-    outfile.write("Sample\t"+'\t'.join(df[samplename].keys())+"\n")
-    #print "##############################"
+    # Print header with gene names
+    firstsample = list(df.keys())[0]
+    outfile.write("Sample\t"+'\t'.join(df[firstsample].keys())+"\n")
+
+    if debug: print("##############################")
+    # Loop all samples
     for sp in df:
         outfile.write(sp+'\t'+'\t'.join(df[sp].values())+"\n")
-    #    print sp+'\t'+'\t'.join(df[sp].values())
-    #print "##############################"
+        if debug: print(sp+'\t'+'\t'.join(df[sp].values()))
+    if debug: print("##############################")
     outfile.close()
 
+    # Printing the mutation details chart/table
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
+    # Printing annotations header
     outfile.write('\t'.join(lolipop)+"\n")
-    #print "##############################"
+
+    if debug: print("##############################")
     for samplename in rdf:
         for gene in rdf[samplename]:
             thisrec = rdf[samplename][gene]["REC"]
+            vaf=(sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0)/sum(thisrec.genotype(samplename)[DEPTH_KEY])
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
+                # Look for the first transcript with this effect
                 if rdf[samplename][gene]["EFF"] in pred.split("|")[1].split("&"):
                     proteffect=pred.split("|")[10]
                     break
+
             if (debug):
-                print(thisrec.INFO["ANN"])
-                print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]))
-            outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0])] )+"\n")
-    #print "##############################"
+                #print(thisrec.INFO["ANN"])
+                print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), vaf)
+
+            outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), str(vaf)])+"\n")
+    if debug: print("##############################")
     outfile.close()
 
 
