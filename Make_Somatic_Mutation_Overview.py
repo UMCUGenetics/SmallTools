@@ -226,6 +226,7 @@ def main():
 
         # FOR EACH GENE OF INTREST
         for gene in genelist:
+            nr_of_positions = 0
             if len(gene)<=0:
                 continue
             thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
@@ -249,6 +250,7 @@ def main():
 
             # For each variant position within gene
             for vcf_record in vcf_records:
+                nr_of_positions += 1
                 # For each sample
                 for samplename in df:
                     #CHECK IF SAMPLE GENOTYPE AVAILABLE
@@ -270,6 +272,10 @@ def main():
                         if check_depth(sgenot):
                             log += ":PASS"
                             log += "\tVAF:{}".format(sum(vcf_record.genotype(samplename)[VAF_KEY][1:])*1.0/sum(vcf_record.genotype(samplename)[DEPTH_KEY]))
+
+                            # add clean if sufficient depth is measured
+                            effects[samplename].append("clean")
+
                             # CHECK VARIANT ALLELE FREQUENCY
                             if check_vaf(sgenot):
                                 log +=":PASS"
@@ -302,7 +308,12 @@ def main():
                             rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[samplename][loc]
                             rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
                     else:
-                        df[samplename][thisgene["SYMBOL"]] = "None"
+                        # check number of 'clean' positions
+                        # if 50% of positions passes DP metric count as clean
+                        if effects[samplename].count("clean") >= (nr_of_positions/2):
+                            df[samplename][thisgene["SYMBOL"]] = "clean"
+                        else:
+                            df[samplename][thisgene["SYMBOL"]] = "None"
 
                 if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects[samplename])))
 
