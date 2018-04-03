@@ -24,6 +24,7 @@ parser.add_option("--t",        dest="nrcpus",     help="Number of CPUs to use p
 parser.add_option("--dp",       dest="mindepth",   help="Minimum read depth to consider reliable", default=10)
 parser.add_option("--af",       dest="minvaf",     help="Minimum variant allele fraction",         default=0.25)
 parser.add_option("--pf",       dest="popfreq",    help="Maximum popultaion frequency",            default=0.05)
+parser.add_option("--cf",       dest="cohfreq",    help="Maximum cohort frequency",                default=0.10)
 
 parser.add_option("--debug",    dest="debug",      help="Flag for debug logging",                  default=False)
 parser.add_option("--format",   dest="format",     help="VCF output format [GATK/FREEB/..]",       default="GATK")
@@ -286,7 +287,7 @@ def main():
                                     log += ":PASS"
                                     log += "\tMLEAF:{}".format(vcf_record.INFO["MLEAF"])
                                     # CHECK OCCURENCE IN TOTAL POOL
-                                    if max(vcf_record.INFO["MLEAF"]) <= 0.20:
+                                    if max(vcf_record.INFO["MLEAF"]) <= float(options.cohfreq):
                                         log +=":PASS"
                                         PASS = True
 
