@@ -270,15 +270,16 @@ def main():
     for samplename in rdf:
         for gene in rdf[samplename]:
             thisrec = rdf[samplename][gene]["REC"]
+            vaf=sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0/sum(thisrec.genotype(samplename)[DEPTH_KEY])
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
                 if rdf[samplename][gene]["EFF"] in pred.split("|")[1].split("&"):
                     proteffect=pred.split("|")[10]
                     break
+
             if (debug):
                 print(thisrec.INFO["ANN"])
-                vaf=sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0/sum(thisrec.genotype(samplename)[DEPTH_KEY])
                 print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), vaf)
             outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0], vaf)])+"\n")
     if debug: print("##############################")
