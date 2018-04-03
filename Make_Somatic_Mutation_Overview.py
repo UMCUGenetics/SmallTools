@@ -51,7 +51,7 @@ def check_arguments():
     if not os.path.exists(options.outdir):
         print("Creating output folder %s"%(options.outdir))
         try:
-            os.makedir(options.outdir)
+            os.mkdir(options.outdir)
         except OSError:
             print("Invalid / unable to create, output folder %s"%(options.outdir))
             return False
@@ -246,18 +246,27 @@ def main():
         #print(sample, df[sample])
         if (debug): print "Sample\t"+'\t'.join(df[samplename].keys())
 
+
+    # Printing the mutation overview table
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
-    outfile.write("Sample\t"+'\t'.join(df[samplename].keys())+"\n")
-    #print "##############################"
+    # Print header with gene names
+    firstsample = list(df.keys())[0]
+    outfile.write("Sample\t"+'\t'.join(df[firstsample].keys())+"\n")
+
+    if debug: print("##############################")
+    # Loop all samples
     for sp in df:
         outfile.write(sp+'\t'+'\t'.join(df[sp].values())+"\n")
-    #    print sp+'\t'+'\t'.join(df[sp].values())
-    #print "##############################"
+        if debug: print(sp+'\t'+'\t'.join(df[sp].values()))
+    if debug: print("##############################")
     outfile.close()
 
+    # Printing the mutation details chart/table
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
+    # Printing annotations header
     outfile.write('\t'.join(lolipop)+"\n")
-    #print "##############################"
+
+    if debug: print("##############################")
     for samplename in rdf:
         for gene in rdf[samplename]:
             thisrec = rdf[samplename][gene]["REC"]
@@ -272,7 +281,7 @@ def main():
                 vaf=sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0/sum(thisrec.genotype(samplename)[DEPTH_KEY])
                 print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), vaf)
             outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0], vaf)])+"\n")
-    #print "##############################"
+    if debug: print("##############################")
     outfile.close()
 
 
