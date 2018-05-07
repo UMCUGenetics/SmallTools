@@ -362,20 +362,20 @@ def main():
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
     # Print header with gene names
     firstsample = list(df.keys())[0]
-    outfile.write("Sample\t"+'\t'.join(df[firstsample].keys())+"\tTotMutCount"+"\n")
+    outfile.write("Sample\t{}\tTotMutCount\n".format('\t'.join(df[firstsample].keys())))
 
     if debug: print("##############################")
     # Loop all samples
     for sp in df:
-        outfile.write(sp+'\t'+'\t'.join(df[sp].values())+'\t'+sum(cdf[sp].values())+"\n")
-        if debug: print(sp+'\t'+'\t'.join(df[sp].values())+'\t'+sum(cdf[sp].values()))
+        outfile.write("{}\t{}\t{}\n".format(sp, '\t'.join(df[sp].values()), sum(cdf[sp].values())))
+        if debug: print("{}\t{}\t{}\n".format(sp, '\t'.join(df[sp].values()), sum(cdf[sp].values())))
     if debug: print("##############################")
     outfile.close()
 
     # Printing the mutation details chart/table
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
     # Printing annotations header
-    outfile.write('\t'.join(lollipop)+"\n")
+    outfile.write("{}\n".format('\t'.join(lollipop)))
 
     if debug: print("##############################")
     for samplename in rdf:
