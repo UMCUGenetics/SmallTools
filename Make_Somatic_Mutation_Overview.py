@@ -64,7 +64,7 @@ FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF
 
 # -------------------------------------------------
 # DETERMINE which effects to report based on 'abribitrary' variant impact score
-toselect = [k for k,v in vocabulary.items() if v >= options.mineff]
+toselect = [k for k,v in vocabulary.items() if v >= float(options.mineff)]
 # -------------------------------------------------
 
 
