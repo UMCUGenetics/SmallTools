@@ -334,7 +334,8 @@ def main():
 
                 # Else determine the max effect
                 else:
-                    cdf[samplename][thisgene["SYMBOL"]] = len(effects[samplename]) - effects[samplename].count("clean")
+                    cdf[samplename][thisgene["SYMBOL"]] = sum([eff in toselect for eff in effects[samplename]])
+                    #len(effects[samplename]) - effects[samplename].count("clean")
                     loc = select_maximum_effect(effects[samplename])
                     eff = effects[samplename][loc]
 
