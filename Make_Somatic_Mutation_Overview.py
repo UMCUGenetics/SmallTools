@@ -362,15 +362,29 @@ def main():
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
     # Print header with gene names
     firstsample = list(df.keys())[0]
-    outfile.write("Sample\t{}\tTotMutCount\n".format('\t'.join(df[firstsample].keys())))
-
+    outfile.write("Sample\t{}\n".format('\t'.join(df[firstsample].keys()) ))
     if debug: print("##############################")
     # Loop all samples
     for sp in df:
-        outfile.write("{}\t{}\t{}\n".format(sp, '\t'.join(df[sp].values()), sum(cdf[sp].values())))
-        if debug: print("{}\t{}\t{}\n".format(sp, '\t'.join(df[sp].values()), sum(cdf[sp].values())))
+        outfile.write("{}\t{}\n".format(sp, '\t'.join(df[sp].values()) ))
+        if debug: print("{}\t{}\n".format(sp, '\t'.join(df[sp].values()) ))
     if debug: print("##############################")
     outfile.close()
+
+
+    # Printing the mutation count table
+    outfile = open(options.outdir+"/"+"MutationCounts.txt",'w')
+    # Print header with gene names
+    firstsample = list(cdf.keys())[0]
+    outfile.write("Sample\t{}\tTotMutCount\n".format('\t'.join(cdf[firstsample].keys()) ))
+    if debug: print("##############################")
+    # Loop all samples
+    for sp in df:
+        outfile.write("{}\t{}\t{}\n".format(sp, '\t'.join(cdf[sp].values()), sum(cdf[sp].values()) ))
+        if debug: print("{}\t{}\t{}\n".format(sp, '\t'.join(cdf[sp].values()), sum(cdf[sp].values()) ))
+    if debug: print("##############################")
+    outfile.close()
+
 
     # Printing the mutation details chart/table
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
