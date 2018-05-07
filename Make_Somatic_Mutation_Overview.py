@@ -25,25 +25,49 @@ parser.add_option("--dp",       dest="mindepth",   help="Minimum read depth to c
 parser.add_option("--af",       dest="minvaf",     help="Minimum variant allele fraction",         default=0.25)
 parser.add_option("--pf",       dest="popfreq",    help="Maximum popultaion frequency",            default=0.05)
 parser.add_option("--cf",       dest="cohfreq",    help="Maximum cohort frequency",                default=0.10)
+parser.add_option("--me",       dest="mineff",     help="Minimum variant effect score",            default=1.50)
 
 parser.add_option("--debug",    dest="debug",      help="Flag for debug logging",                  default=False)
 parser.add_option("--format",   dest="format",     help="VCF output format [GATK/FREEB/..]",       default="GATK")
 (options, args) = parser.parse_args()
 # -------------------------------------------------
 
-# PREP FILES AND ENVIRONMENT
-# for i in *.vcf; do sed -r -i 's/;dbNSFP_clinvar_clnsig=(.+);/;/g' $i; done
-# os.system("module load tabix")
+# -------------------------------------------------
+vocabulary = {
+    "None":-1, "clean":0,
+    "sequence_feature":0, "intron_variant":0,
+    "3_prime_UTR_variant":0, "5_prime_UTR_variant":0, "non_coding_exon_variant":0,
+    "TF_binding_site_variant":0.5, "splice_region_variant":0.5,
+    "synonymous_variant":1.0,
+    "missense_variant":1.5,
+    "splice_donor_variant":2, "splice_acceptor_variant":2,
+    "inframe_deletion":2.1, "inframe_insertion":2.1,
+    "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5,
+    "5_prime_UTR_premature_start_codon_gain_variant":3,
+    "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":4
+}
+
+# Mapping of SNEPeff effects to 'MAF' names for variation effects, enables later use in MAF tools
+# https://wiki.nci.nih.gov/display/TCGA/Mutation+Annotation+Format+%28MAF%29+Specification+-+v1.0
+# https://bioconductor.org/packages/3.7/bioc/vignettes/maftools/inst/doc/maftools.html
+mapping = {
+    "synonymous_variant":"Silent", "missense_variant":"Missense_Mutation", "disruptive_inframe_deletion":"Frame_Shift_Del", "disruptive_inframe_insertion":"Frame_Shift_Ins",
+    "5_prime_UTR_premature_start_codon_gain_variant":"Nonsense_Mutation", "stop_gained":"Nonsense_Mutation", "nonsense_mediated_decay":"Nonsense_Mutation", "frameshift_variant":"Frame_Shift_???"
+}
+# Data fields needed to make lollipop plots
+lollipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele","VAF"]
+
+# Known fields with information on population frequency
+FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
+
+
 
 # -------------------------------------------------
-vocabulary = {"None":-1, "clean":0, "sequence_feature":0, "synonymous_variant":0.5, "intron_variant":0, "3_prime_UTR_variant":0.5, "5_prime_UTR_variant":0.5, "non_coding_exon_variant":0.5, "TF_binding_site_variant":1.0, "splice_region_variant":1.1, "missense_variant":1.5, "splice_donor_variant":2, "splice_acceptor_variant":2, "inframe_deletion":2.1, "inframe_insertion":2.1, "disruptive_inframe_deletion":2.5, "disruptive_inframe_insertion":2.5, "5_prime_UTR_premature_start_codon_gain_variant":3, "stop_gained":4, "nonsense_mediated_decay":4, "frameshift_variant":5}
-toselect = [k for k,v in vocabulary.items() if v >= 1.5]
-
-mapping = {"missense_variant":"Missense_Mutation", "disruptive_inframe_deletion":"Frame_Shift_Del", "disruptive_inframe_insertion":"Frame_Shift_Ins", "5_prime_UTR_premature_start_codon_gain_variant":"Nonsense_Mutation", "stop_gained":"Nonsense_Mutation", "nonsense_mediated_decay":"Nonsense_Mutation", "frameshift_variant":"Frame_Shift_???"}
-lolipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromosome","Start_Position","End_Position","Reference_Allele","Variant_Allele","VAF"]
+# DETERMINE which effects to report based on 'abribitrary' variant impact score
+toselect = [k for k,v in vocabulary.items() if v >= options.mineff]
+# -------------------------------------------------
 
 
-FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
 # -------------------------------------------------
 debug = options.debug
 DEPTH_KEY=""
@@ -197,8 +221,12 @@ def main():
 
     genelist=open(options.genelist, 'r').read().split('\n')
 
+    # DF to keep the mutation effcts per gene
     df = {}
+    #VCF record df, for MAX effects only, used for lollipop data
     rdf= {}
+    #Count data frame
+    cdf = {}
 
     # FOR ALL VCF FILES
     for vcf_file in file_list:
@@ -222,6 +250,7 @@ def main():
                 #samplename = vcf_file.split(".")[1].split("_")[1]
             df[samplename] = {}
             rdf[samplename] = {}
+            cdf[samplename] = {}
 
         if debug: print(df)
 
@@ -296,19 +325,28 @@ def main():
                         effects[samplename].append(find_effects(vcf_record))
                         records[samplename].append(vcf_record)
 
-            # ON GENE+SAMPLE LEVEL determine maximum mutation effect
+            # ON GENE+SAMPLE LEVEL determine the number of mutations and the maximum mutation effect
             for samplename in df:
+                # If no murtations/effects measured consider the gene as 'not assesed'
                 if len(effects[samplename]) <= 0:
                     df[samplename][thisgene["SYMBOL"]] = "None"
+                    cdf[samplename][thisgene["SYMBOL"]] = 0
+
+                # Else determine the max effect
                 else:
+                    cdf[samplename][thisgene["SYMBOL"]] = len(effects[samplename]) - effects[samplename].count("clean")
                     loc = select_maximum_effect(effects[samplename])
                     eff = effects[samplename][loc]
+
+                    # If a 'strong enough' effect is detected report it in the summary
                     if eff in toselect:
                         df[samplename][thisgene["SYMBOL"]] = eff
                         if eff in mapping:
                             rdf[samplename][thisgene["SYMBOL"]] = {}
                             rdf[samplename][thisgene["SYMBOL"]]["REC"] = records[samplename][loc]
                             rdf[samplename][thisgene["SYMBOL"]]["EFF"] = eff
+
+                    # Else check if gene was not observed 'None' or not mutated 'clean'
                     else:
                         # check number of 'clean' positions
                         # if 50% of positions passes DP metric count as clean
@@ -317,27 +355,27 @@ def main():
                         else:
                             df[samplename][thisgene["SYMBOL"]] = "None"
 
-                if debug: print("** {}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], ",".join(effects[samplename])))
+                if debug: print("** {}\t{}\t{}\t{}\t{}".format(thisgene, samplename, df[samplename][thisgene["SYMBOL"]], cdf[samplename][thisgene["SYMBOL"]], ",".join(effects[samplename])))
 
 
     # Printing the mutation overview table
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
     # Print header with gene names
     firstsample = list(df.keys())[0]
-    outfile.write("Sample\t"+'\t'.join(df[firstsample].keys())+"\n")
+    outfile.write("Sample\t"+'\t'.join(df[firstsample].keys())+"\tTotMutCount"+"\n")
 
     if debug: print("##############################")
     # Loop all samples
     for sp in df:
-        outfile.write(sp+'\t'+'\t'.join(df[sp].values())+"\n")
-        if debug: print(sp+'\t'+'\t'.join(df[sp].values()))
+        outfile.write(sp+'\t'+'\t'.join(df[sp].values())+'\t'+sum(cdf[sp].values())+"\n")
+        if debug: print(sp+'\t'+'\t'.join(df[sp].values())+'\t'+sum(cdf[sp].values()))
     if debug: print("##############################")
     outfile.close()
 
     # Printing the mutation details chart/table
     outfile = open(options.outdir+"/"+"MutationChart.txt",'w')
     # Printing annotations header
-    outfile.write('\t'.join(lolipop)+"\n")
+    outfile.write('\t'.join(lollipop)+"\n")
 
     if debug: print("##############################")
     for samplename in rdf:
