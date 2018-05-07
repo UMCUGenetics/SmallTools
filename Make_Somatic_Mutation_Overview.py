@@ -379,7 +379,7 @@ def main():
     outfile.write("Sample\t{}\tTotMutCount\n".format('\t'.join(cdf[firstsample].keys()) ))
     if debug: print("##############################")
     # Loop all samples
-    for sp in df:
+    for sp in cdf:
         outfile.write("{}\t{}\t{}\n".format(sp, '\t'.join(cdf[sp].values()), sum(cdf[sp].values()) ))
         if debug: print("{}\t{}\t{}\n".format(sp, '\t'.join(cdf[sp].values()), sum(cdf[sp].values()) ))
     if debug: print("##############################")
