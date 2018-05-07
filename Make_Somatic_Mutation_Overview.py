@@ -366,8 +366,9 @@ def main():
     if debug: print("##############################")
     # Loop all samples
     for sp in df:
-        outfile.write("{}\t{}\n".format(sp, '\t'.join(df[sp].values()) ))
         if debug: print("{}\t{}\n".format(sp, '\t'.join(df[sp].values()) ))
+        outfile.write("{}\t{}\n".format(sp, '\t'.join(df[sp].values()) ))
+
     if debug: print("##############################")
     outfile.close()
 
@@ -380,8 +381,9 @@ def main():
     if debug: print("##############################")
     # Loop all samples
     for sp in cdf:
-        outfile.write("{}\t{}\t{}\n".format(sp, '\t'.join(cdf[sp].values()), sum(cdf[sp].values()) ))
-        if debug: print("{}\t{}\t{}\n".format(sp, '\t'.join(cdf[sp].values()), sum(cdf[sp].values()) ))
+        if debug: print("{}\t{}\t{}\n".format(sp, '\t'.join([str(i) for i in cdf[sp].values()]), sum(cdf[sp].values()) ))
+        outfile.write("{}\t{}\t{}\n".format(sp, '\t'.join([str(i) for i in cdf[sp].values()]), sum(cdf[sp].values()) ))
+
     if debug: print("##############################")
     outfile.close()
 
