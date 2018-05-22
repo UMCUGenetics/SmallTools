@@ -215,13 +215,13 @@ def condense_bed(genelist):
         genebody=genebody.strip().split('\t')
         if len(genebody) <=0:
             continue
-        gene=genebody[0]
+        gene=genebody[-1]
         #print(genebody)
         if gene not in newlist:
-            newlist[gene] = [genebody[1], int(genebody[2]), int(genebody[3])]
+            newlist[gene] = [genebody[0], int(genebody[1]), int(genebody[2])]
         else:
-            newlist[gene][1] = min(newlist[gene][1],int(genebody[2]))
-            newlist[gene][2] = min(newlist[gene][2],int(genebody[3]))
+            newlist[gene][1] = min(newlist[gene][1],int(genebody[1]))
+            newlist[gene][2] = min(newlist[gene][2],int(genebody[2]))
 
     return([[i,j[0],j[1],j[2]] for i,j in newlist.iteritems()])
 
