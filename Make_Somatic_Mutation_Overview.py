@@ -207,7 +207,17 @@ def check_vaf(sample_vcf):
             return(False)
     return(True)
 
+def condense_bed(genelist):
+    newlist = {}
+    for genebody in genelist:
+        gene=genebody[0]
+        if gene not in newlist:
+            newlist[gene] = [int(genebody[1]),int(genebody[2])]
+        else:
+            newlist[gene][0] = min(newlist[gene][0],int(genebody[1]))
+            newlist[gene][1] = min(newlist[gene][1],int(genebody[2]))
 
+    return([[i,j[0],j[1]] for i,j in newlist.iteritems()])
 
 # -------------------------------------------------
 
@@ -220,6 +230,7 @@ def main():
         zip_and_index(vcf_file)
 
     genelist=open(options.genelist, 'r').read().split('\n')
+    genelist=condense_bed(genelist)
 
     # DF to keep the mutation effcts per gene
     df = {}
