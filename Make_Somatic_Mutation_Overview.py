@@ -212,10 +212,11 @@ def check_vaf(sample_vcf):
 def condense_bed(genelist):
     newlist = {}
     for genebody in genelist:
+        genebody=genebody.strip().split('\t')
         if len(genebody) <=0:
             continue
         gene=genebody[0]
-        print(genebody)
+        #print(genebody)
         if gene not in newlist:
             newlist[gene] = [genebody[1], int(genebody[2]), int(genebody[3])]
         else:
