@@ -207,6 +207,8 @@ def check_vaf(sample_vcf):
             return(False)
     return(True)
 
+# FORMAT:
+#X	100604847	100604968	BTK
 def condense_bed(genelist):
     newlist = {}
     for genebody in genelist:
@@ -215,12 +217,12 @@ def condense_bed(genelist):
         gene=genebody[0]
         print(genebody)
         if gene not in newlist:
-            newlist[gene] = [int(genebody[1]),int(genebody[2])]
+            newlist[gene] = [genebody[1], int(genebody[2]), int(genebody[3])]
         else:
-            newlist[gene][0] = min(newlist[gene][0],int(genebody[1]))
             newlist[gene][1] = min(newlist[gene][1],int(genebody[2]))
+            newlist[gene][2] = min(newlist[gene][2],int(genebody[3]))
 
-    return([[i,j[0],j[1]] for i,j in newlist.iteritems()])
+    return([[i,j[0],j[1],j[2]] for i,j in newlist.iteritems()])
 
 # -------------------------------------------------
 
