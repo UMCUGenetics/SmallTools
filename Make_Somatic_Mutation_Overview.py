@@ -223,7 +223,7 @@ def condense_bed(genelist):
             newlist[gene][1] = min(newlist[gene][1],int(genebody[1]))
             newlist[gene][2] = min(newlist[gene][2],int(genebody[2]))
 
-    return(["\t".join([i,j[0],j[1],j[2]]) for i,j in newlist.iteritems()])
+    return(["\t".join([i,j[0],str(j[1]),(str(j[2]])) for i,j in newlist.iteritems()])
 
 # -------------------------------------------------
 
