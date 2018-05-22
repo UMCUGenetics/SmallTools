@@ -216,7 +216,7 @@ def condense_bed(genelist):
         if len(genebody) <=1:
             continue
         gene=genebody[-1]
-        print("--"+genebody)
+        print("--"+str(genebody))
         if gene not in newlist:
             newlist[gene] = [genebody[0], int(genebody[1]), int(genebody[2])]
         else:
