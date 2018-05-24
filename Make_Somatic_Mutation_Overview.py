@@ -140,9 +140,12 @@ def find_effects(vcf_record):
         # SPLIT THE SEPERATE FIELDS WITHIN THE ANNOTATION
         items = pred.split("|")
         if debug: print("~~~\t"+items[3])
+
         # IF Canonical only mode, skip all other transcripts
         if options.canonical:
             gene = items[4]
+            if len(gene) <= 1:
+                continue
             if gene not in CANONICAL_TRANSCRIPTS:
                  CANONICAL_TRANSCRIPTS[gene] = get_canonical(gene)
             if debug: print("~~~\t"+items[6]+" "+gene+" "+CANONICAL_TRANSCRIPTS[gene])
