@@ -5,6 +5,9 @@ import vcf
 import glob
 import numpy as np
 
+import json
+import requests
+
 #GENE FORMAT
 ##chr    start    stop    name
 #3    178866311    178952497    PIK3CA
@@ -15,6 +18,7 @@ parser = OptionParser()
 parser.add_option("--vcfdir",   dest="vcfdir",     help="Path to directory containing VCF files",  default=False)
 parser.add_option("--outdir",   dest="outdir",     help="Path to directory to write output to",    default="./DriverProfile/")
 parser.add_option("--genelist", dest="genelist",   help="File containing Genes to test/plot)",     default=False)
+parser.add_option("--canon",    dest="canonical",  help="Only report Canonical effects",           default=False)
 
 parser.add_option("--bgzip",    dest="bgzip",      help="Path to bgzip binary",                    default="bgzip")
 parser.add_option("--tabix",    dest="tabix",      help="Path to tabix binary",                    default="tabix")
@@ -60,6 +64,7 @@ lollipop = ["Hugo_Symbol","Sample_ID","Protein_Change","Mutation_Type","Chromoso
 # Known fields with information on population frequency
 FREQ_FIELDS = ["dbNSFP_ExAC_AF", "dbNSFP_ExAC_Adj_AF", "GoNLv5_Freq", "GoNLv5_AF"]
 
+CANONICAL_TRANSCRIPTS = {}
 
 
 # -------------------------------------------------
@@ -134,6 +139,16 @@ def find_effects(vcf_record):
     for pred in vcf_record.INFO["ANN"]:
         # SPLIT THE SEPERATE FIELDS WITHIN THE ANNOTATION
         items = pred.split("|")
+        if debug: print("~~~\t"+items[3])
+        # IF Canonical only mode, skip all other transcripts
+        if options.canonical:
+            gene = items[4]
+            if gene not in CANONICAL_TRANSCRIPTS:
+                 CANONICAL_TRANSCRIPTS[gene] = get_canonical(gene)
+            if debug: print("~~~\t"+items[6]+" "+gene+" "+CANONICAL_TRANSCRIPTS[gene])
+            if items[6]!=CANONICAL_TRANSCRIPTS[gene]:
+                continue
+
         allele = items[0]
         effects = items[1].split("&")
         for effect in effects:
@@ -206,6 +221,34 @@ def check_vaf(sample_vcf):
         if (sum(sample_vcf[VAF_KEY][1:])*1.0/sum(sample_vcf[DEPTH_KEY])) < float(options.minvaf):
             return(False)
     return(True)
+
+# RESTfull functions
+def generic_json_request_handler(server, ext):
+    r = requests.get(server+ext, headers={ "Content-Type" : "application/json"})
+    if not r.ok:
+        r.raise_for_status()
+        sys.exit()
+
+    return(r.json())
+
+def get_canonical(gene):
+    #TODO fix this
+    #Adding some manual covserions for 'lost' IDs
+    if gene == "ENSG00000141720":
+        gene = "ENSG00000276293"
+
+    server = "https://rest.ensembl.org"
+    #ext = "/lookup/symbol/homo_sapiens/{}?content-type=application/json;expand=1;db_type=core".format(genesymbol)
+    ext = "/lookup/id/{}?content-type=application/json;expand=1;db_type=core".format(gene)
+    json = generic_json_request_handler(server, ext)
+
+    for i in range(0,len(json["Transcript"])):
+        if json['Transcript'][i]['is_canonical'] == 1:
+            return(json['Transcript'][i]['id'])
+
+    # if there is no canonical just take the first
+    print("[WARN]   No cannonical transcript found for gene {}, taking the first transcript".format(genesymbol))
+    return(json['Transcript'][0]['id'])
 
 # FORMAT:
 #X	100604847	100604968	BTK
@@ -379,6 +422,7 @@ def main():
     # Printing the mutation overview table
     outfile = open(options.outdir+"/"+"MutationOverview.txt",'w')
     # Print header with gene names
+    if debug: print(df)
     firstsample = list(df.keys())[0]
     outfile.write("Sample\t{}\n".format('\t'.join(df[firstsample].keys()) ))
     if debug: print("##############################")
