@@ -239,12 +239,13 @@ def get_canonical(gene):
     #Adding some manual covserions for 'lost'/'weird' IDs
 
     #PIP4K2B
-    if gene is "ENSG00000141720":
+    if gene == "ENSG00000141720":
         gene = "ENSG00000276293"
 
     #DUSP14
-    if gene is "ENSG00000161326":
+    if gene == "ENSG00000161326":
         gene = "ENSG00000276023"
+
 
     server = "https://rest.ensembl.org"
     #ext = "/lookup/symbol/homo_sapiens/{}?content-type=application/json;expand=1;db_type=core".format(genesymbol)
