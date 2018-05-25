@@ -149,7 +149,7 @@ def find_effects(vcf_record):
             if gene not in CANONICAL_TRANSCRIPTS:
                  CANONICAL_TRANSCRIPTS[gene] = get_canonical(gene)
             if debug: print("~~~\t"+items[6]+" "+gene+" "+CANONICAL_TRANSCRIPTS[gene])
-            if items[6]!=CANONICAL_TRANSCRIPTS[gene]:
+            if items[6] != CANONICAL_TRANSCRIPTS[gene]:
                 continue
 
         allele = items[0]
@@ -253,6 +253,10 @@ def get_canonical(gene):
     # CCND2-AS1
     if gene == "ENSG00000256164":
         gene = "ENSG00000255920"
+
+    # GIFtS
+    if gene == "ENSG00000256239":
+        return("")
 
     server = "https://rest.ensembl.org"
     #ext = "/lookup/symbol/homo_sapiens/{}?content-type=application/json;expand=1;db_type=core".format(genesymbol)
