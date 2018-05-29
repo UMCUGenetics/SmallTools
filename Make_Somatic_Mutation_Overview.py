@@ -258,6 +258,10 @@ def get_canonical(gene):
     if gene == "ENSG00000256239":
         return("")
 
+    # AC005027.3
+    if gene == "ENSG00000236310":
+        return("")
+
     server = "https://rest.ensembl.org"
     #ext = "/lookup/symbol/homo_sapiens/{}?content-type=application/json;expand=1;db_type=core".format(genesymbol)
     ext = "/lookup/id/{}?content-type=application/json;expand=1;db_type=core".format(gene)
