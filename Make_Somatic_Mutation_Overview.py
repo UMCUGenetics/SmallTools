@@ -139,10 +139,11 @@ def find_effects(vcf_record, sample_gt):
     for pred in vcf_record.INFO["ANN"]:
         # SPLIT THE SEPERATE FIELDS WITHIN THE ANNOTATION
         items = pred.split("|")
-        if debug: print("~~~\t"+items[3]+"\t"+items[4]+"\n"+"|".join(items))
+        #if debug: print("~~~\t"+items[3]+"\t"+items[4]+"\n"+"|".join(items))
 
         # Skip if annotation ALT allele does not match sample ALT allele
-        if items[0] != sample_gt:
+        if str(items[0]) != str(sample_gt):
+            if debug: print("SKIPPING DUE TO MISMATCHING GENOTYPE\t|{}|\t|{}|".format(items[0], sample_gt))
             continue
 
         # IF Canonical only mode, skip all other transcripts
@@ -159,6 +160,7 @@ def find_effects(vcf_record, sample_gt):
         allele = items[0]
         effects = items[1].split("&")
         for effect in effects:
+            if debug: print(effect)
             if effect not in vocabulary:
                 # A NEW MUTATION EFFECT WAS FOUND
                 if debug:
@@ -291,7 +293,7 @@ def condense_bed(genelist):
         genebody=genebody.strip().split('\t')
         if len(genebody) <=1:
             continue
-        gene=genebody[-1]
+        gene=genebody[3]
         #print("--"+str(genebody))
         if gene not in newlist:
             newlist[gene] = [genebody[0], int(genebody[1]), int(genebody[2])]
@@ -313,6 +315,7 @@ def main():
 
     genelist=open(options.genelist, 'r').read().split('\n')
     genelist=condense_bed(genelist)
+    if debug: print("GENES {}".format(genelist))
 
     # DF to keep the mutation effcts per gene
     df = {}
@@ -373,13 +376,16 @@ def main():
 
             # For each variant position within gene
             for vcf_record in vcf_records:
-                if debug: print(vcf_record.INFO)
-                
+                if debug: print("@@@\t {}".format(vcf_record.INFO))
+
                 if not "ANN" in vcf_record.INFO:
                     if debug: print("@@@\t skipping record {} due to missing ANN field".format(vcf_record))
                     continue
-                if thisgene["SYMBOL"] not in vcf_record.INFO["ANN"]:
-                    if debug: print("@@@\t skipping record {} due to missing GENE SYMBOL".format(vcf_record))
+
+
+                gencheck = [thisgene["SYMBOL"] in a for a in vcf_record.INFO["ANN"]]
+                if sum(gencheck) <= 0:
+                    if debug: print("@@@\t skipping record {} due to missing GENE SYMBOL {}".format(vcf_record, thisgene["SYMBOL"]))
                     continue
 
                 nr_of_positions += 1
@@ -389,14 +395,14 @@ def main():
                     sgenot = None
                     try:
                         sgenot = vcf_record.genotype(samplename)
-                        if debug: print("-- {}\t{}\tGT FOUND".format(thisgene, samplename, sgenot))
+                        #if debug: print("-- {}\t{}\t{}\tGT FOUND".format(thisgene, samplename, sgenot))
                     except AttributeError as e:
-                        if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, samplename))
+                        #if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, samplename))
                         continue
 
                     # FILTER NON-QC RECORDS
                     PASS = False
-                    log = "++ {}\t{}\t{}".format(thisgene, samplename, vcf_record)
+                    log = "++ {}\t{}\t{}\t{}".format(thisgene, samplename, vcf_record, vcf_record.genotype(samplename)['GT'])
                     # CHEK IF AD FIELD PRESENT
                     if check_ad(sgenot):
                         log += "\tAD:PASS"
@@ -426,11 +432,15 @@ def main():
                     if debug: print(log)
                     if PASS:
                         # PARSE '0/1' into ALT[0] or '0/2' into ALT[1]
-                        sample_gt = vcf_record.ALT[int(sgenot[:-1])-1]
-                        if debug: print("-- {}\t{}\tPARSED GT".format(thisgene, samplename, sgenot, sample_gt))
+                        sample_call = sgenot['GT'].replace("|","").split("/")
+                        sample_gt = vcf_record.ALT[int(sample_call[-1])-1]
+                        #if debug: print("-- {}\t{}\tPARSED GT\t{}\t{}\t{}".format(thisgene, samplename, sgenot, sample_call, sample_gt))
+
                         effects[samplename].append(find_effects(vcf_record, sample_gt))
+                        print("SAMPLE: {} \t\t EFF: {}".format(samplename,effects[samplename]))
                         records[samplename].append(vcf_record)
 
+            #exit(0)
             # ON GENE+SAMPLE LEVEL determine the number of mutations and the maximum mutation effect
             for samplename in df:
                 # If no murtations/effects measured consider the gene as 'not assesed'
@@ -505,7 +515,11 @@ def main():
     for samplename in rdf:
         for gene in rdf[samplename]:
             thisrec = rdf[samplename][gene]["REC"]
-            vaf=(sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0)/sum(thisrec.genotype(samplename)[DEPTH_KEY])
+
+            vaf=round((sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0)/sum(thisrec.genotype(samplename)[DEPTH_KEY]),2)
+
+            sample_call = thisrec.genotype(samplename)['GT'].replace("|","").split("/")
+            sample_gt = vcf_record.ALT[int(sample_call[-1])-1]
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
@@ -514,11 +528,9 @@ def main():
                     proteffect=pred.split("|")[10]
                     break
 
-            if (debug):
-                #print(thisrec.INFO["ANN"])
-                print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), vaf)
+            if (debug): print(gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), vaf)
 
-            outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(thisrec.ALT[0])), thisrec.REF, str(thisrec.ALT[0]), str(vaf)])+"\n")
+            outfile.write("\t".join([gene, samplename, proteffect, mapping[rdf[samplename][gene]["EFF"]], str(thisrec.CHROM), str(thisrec.POS), str(thisrec.POS+len(sample_gt)), thisrec.REF, str(sample_gt), str(vaf)])+"\n")
     if debug: print("##############################")
     outfile.close()
 
