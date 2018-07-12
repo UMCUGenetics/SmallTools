@@ -437,7 +437,7 @@ def main():
                         #if debug: print("-- {}\t{}\tPARSED GT\t{}\t{}\t{}".format(thisgene, samplename, sgenot, sample_call, sample_gt))
 
                         effects[samplename].append(find_effects(vcf_record, sample_gt))
-                        print("SAMPLE: {} \t\t EFF: {}".format(samplename,effects[samplename]))
+                        #print("SAMPLE: {} \t\t EFF: {}".format(samplename,effects[samplename]))
                         records[samplename].append(vcf_record)
 
             #exit(0)
@@ -519,6 +519,9 @@ def main():
             vaf=round((sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0)/sum(thisrec.genotype(samplename)[DEPTH_KEY]),2)
 
             sample_call = thisrec.genotype(samplename)['GT'].replace("|","").split("/")
+            print(sample_call)
+            print(sample_call[-1])
+            print(vcf_record.ALT)
             sample_gt = vcf_record.ALT[int(sample_call[-1])-1]
 
             proteffect=None
