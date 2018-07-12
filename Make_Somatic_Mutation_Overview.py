@@ -128,7 +128,7 @@ def find_popfreq(vcf_record):
     return(popfreq)
 
 # Determine the most damaging effect of the variant
-def find_effects(vcf_record):
+def find_effects(vcf_record, sample_gt):
     maxeffect="None"
     if debug: print(vcf_record.INFO)
 
@@ -139,7 +139,11 @@ def find_effects(vcf_record):
     for pred in vcf_record.INFO["ANN"]:
         # SPLIT THE SEPERATE FIELDS WITHIN THE ANNOTATION
         items = pred.split("|")
-        if debug: print("~~~\t"+items[3])
+        if debug: print("~~~\t"+items[3]+"\t"+items[4]+"\n"+"|".join(items))
+
+        # Skip if annotation ALT allele does not match sample ALT allele
+        if items[0] != sample_gt:
+            continue
 
         # IF Canonical only mode, skip all other transcripts
         if options.canonical:
@@ -369,6 +373,13 @@ def main():
 
             # For each variant position within gene
             for vcf_record in vcf_records:
+                if not "ANN" in vcf_record.INFO:
+                    if debug: print("@@@\t skipping record {}".format(vcf_record))
+                    continue
+                if thisgene["SYMBOL"] not in vcf_record.INFO["ANN"]:
+                    if debug: print("@@@\t skipping record {}".format(vcf_record))
+                    continue
+
                 nr_of_positions += 1
                 # For each sample
                 for samplename in df:
@@ -376,13 +387,14 @@ def main():
                     sgenot = None
                     try:
                         sgenot = vcf_record.genotype(samplename)
+                        if debug: print("-- {}\t{}\tGT FOUND".format(thisgene, samplename, sgenot))
                     except AttributeError as e:
                         if debug: print("-- {}\t{}\tNO GT FOUND".format(thisgene, samplename))
                         continue
 
                     # FILTER NON-QC RECORDS
                     PASS = False
-                    log = "++ {}\t{}\t{}".format(thisgene,samplename,vcf_record)
+                    log = "++ {}\t{}\t{}".format(thisgene, samplename, vcf_record)
                     # CHEK IF AD FIELD PRESENT
                     if check_ad(sgenot):
                         log += "\tAD:PASS"
@@ -411,7 +423,10 @@ def main():
 
                     if debug: print(log)
                     if PASS:
-                        effects[samplename].append(find_effects(vcf_record))
+                        # PARSE '0/1' into ALT[0] or '0/2' into ALT[1]
+                        sample_gt = vcf_record.ALT[int(sgenot[:-1])-1]
+                        if debug: print("-- {}\t{}\tPARSED GT".format(thisgene, samplename, sgenot, sample_gt))
+                        effects[samplename].append(find_effects(vcf_record, sample_gt))
                         records[samplename].append(vcf_record)
 
             # ON GENE+SAMPLE LEVEL determine the number of mutations and the maximum mutation effect
