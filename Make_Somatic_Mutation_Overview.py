@@ -519,10 +519,10 @@ def main():
             vaf=round((sum(thisrec.genotype(samplename)[VAF_KEY][1:])*1.0)/sum(thisrec.genotype(samplename)[DEPTH_KEY]),2)
 
             sample_call = thisrec.genotype(samplename)['GT'].replace("|","").split("/")
-            print(sample_call)
-            print(sample_call[-1])
-            print(vcf_record.ALT)
-            sample_gt = vcf_record.ALT[int(sample_call[-1])-1]
+            #print(sample_call)
+            #print(sample_call[-1])
+            #print(thisrec.ALT)
+            sample_gt = thisrec.ALT[int(sample_call[-1])-1]
 
             proteffect=None
             for pred in thisrec.INFO["ANN"]:
