@@ -373,11 +373,13 @@ def main():
 
             # For each variant position within gene
             for vcf_record in vcf_records:
+                if debug: print(vcf_record.INFO)
+                
                 if not "ANN" in vcf_record.INFO:
-                    if debug: print("@@@\t skipping record {}".format(vcf_record))
+                    if debug: print("@@@\t skipping record {} due to missing ANN field".format(vcf_record))
                     continue
                 if thisgene["SYMBOL"] not in vcf_record.INFO["ANN"]:
-                    if debug: print("@@@\t skipping record {}".format(vcf_record))
+                    if debug: print("@@@\t skipping record {} due to missing GENE SYMBOL".format(vcf_record))
                     continue
 
                 nr_of_positions += 1
