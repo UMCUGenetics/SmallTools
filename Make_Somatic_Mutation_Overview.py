@@ -246,9 +246,9 @@ def get_geneinfo(gene, idtype):
     server = "https://grch37.rest.ensembl.org"
 
     if idtype == "symbol":
-        ext = "/lookup/symbol/homo_sapiens/{}}?content-type=application/json".format(gene)
+        ext = "/lookup/symbol/homo_sapiens/{}?content-type=application/json".format(gene)
     else:
-        ext = "/lookup/id/{}}?content-type=application/json".format(gene)
+        ext = "/lookup/id/{}?content-type=application/json".format(gene)
 
     json = generic_json_request_handler(server, ext)
     genedef = {"Chr":json[0]['seq_region_name'], "Start":json[0]['start'], "Stop":json[0]['end'], "SYMBOL":json[0]['display_name'], "ENSEMBLID":json[0]['id']}
