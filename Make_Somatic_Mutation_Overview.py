@@ -189,7 +189,7 @@ def zip_and_index(vcffile):
     if not os.path.exists(vcffile+".gz"+".tbi"):
         os.system(options.tabix+" "+vcffile+".gz")
 
-
+# -------------------------------------------------
 # GENE FORMAT
 # Gene name + location + variants or not
 # VARIANT FORMAT
@@ -231,6 +231,7 @@ def check_vaf(sample_vcf):
             return(False)
     return(True)
 
+# -------------------------------------------------
 # RESTfull functions
 def generic_json_request_handler(server, ext):
     r = requests.get(server+ext, headers={ "Content-Type" : "application/json"})
@@ -241,7 +242,7 @@ def generic_json_request_handler(server, ext):
     return(r.json())
 
 
-get_geneinfo(gene, idtype):
+def get_geneinfo(gene, idtype):
     server = "https://grch37.rest.ensembl.org"
 
     if idtype == "symbol":
