@@ -240,41 +240,24 @@ def generic_json_request_handler(server, ext):
 
     return(r.json())
 
-def get_canonical(gene):
-    #TODO fix this
-    #Adding some manual covserions for 'lost'/'weird' IDs
 
-    # PIP4K2B
-    if gene == "ENSG00000141720":
-        gene = "ENSG00000276293"
+get_geneinfo(gene, idtype):
+    server = "https://grch37.rest.ensembl.org"
 
-    # DUSP14
-    if gene == "ENSG00000161326":
-        gene = "ENSG00000276023"
+    if idtype == "symbol":
+        ext = "/lookup/symbol/homo_sapiens/{}}?content-type=application/json".format(gene)
+    else:
+        ext = "/lookup/id/{}}?content-type=application/json".format(gene)
 
-    # AC004893.11
-    if gene == "ENSG00000242687":
-        return("None")
+    json = generic_json_request_handler(server, ext)
+    genedef = {"Chr":json[0]['seq_region_name'], "Start":json[0]['start'], "Stop":json[0]['end'], "SYMBOL":json[0]['display_name'], "ENSEMBLID":json[0]['id']}
 
-    # CCND2-AS1
-    if gene == "ENSG00000256164":
-        gene = "ENSG00000255920"
+    return(genedef)
 
-    # GIFtS
-    if gene == "ENSG00000256239":
-        return("None")
 
-    # AC005027.3
-    if gene == "ENSG00000236310":
-        return("None")
-
-    # ??
-    if gene == "ENSG00000268800":
-        return("None")
-
-    server = "https://rest.ensembl.org"
-    #ext = "/lookup/symbol/homo_sapiens/{}?content-type=application/json;expand=1;db_type=core".format(genesymbol)
-    ext = "/lookup/id/{}?content-type=application/json;expand=1;db_type=core".format(gene)
+def get_canonical(ensembleid):
+    server = "https://grch37.rest.ensembl.org"
+    ext = "/lookup/id/{}?content-type=application/json;expand=1;db_type=core".format(ensembleid)
     json = generic_json_request_handler(server, ext)
 
     for i in range(0,len(json["Transcript"])):
@@ -282,26 +265,8 @@ def get_canonical(gene):
             return(json['Transcript'][i]['id'])
 
     # if there is no canonical just take the first
-    print("[WARN]   No cannonical transcript found for gene {}, taking the first transcript".format(genesymbol))
+    print("[WARN]   No cannonical transcript found for gene {}, taking the first transcript".format(ensembleid))
     return(json['Transcript'][0]['id'])
-
-# FORMAT:
-#X	100604847	100604968	BTK
-def condense_bed(genelist):
-    newlist = {}
-    for genebody in genelist:
-        genebody=genebody.strip().split('\t')
-        if len(genebody) <=1:
-            continue
-        gene=genebody[3]
-        #print("--"+str(genebody))
-        if gene not in newlist:
-            newlist[gene] = [genebody[0], int(genebody[1]), int(genebody[2])]
-        else:
-            newlist[gene][1] = min(newlist[gene][1],int(genebody[1]))
-            newlist[gene][2] = min(newlist[gene][2],int(genebody[2]))
-
-    return(["\t".join([j[0],str(j[1]),str(j[2]),i]) for i,j in newlist.iteritems()])
 
 # -------------------------------------------------
 
@@ -313,8 +278,17 @@ def main():
     for vcf_file in file_list:
         zip_and_index(vcf_file)
 
-    genelist=open(options.genelist, 'r').read().split('\n')
-    genelist=condense_bed(genelist)
+    genecollection=[]
+    genelist=[]
+    with open(options.genelist, 'r') as infile:
+        for line in infile:
+            genesymbol = line.strip().split('\t')[-1]
+
+            if genesymbol not in genecollection:
+                genelist.append(get_geneinfo(genesymbol, 'symbol'))
+                genecollection.append(genesymbol)
+
+    if debug: print("GENES {}".format(genecollection))
     if debug: print("GENES {}".format(genelist))
 
     # DF to keep the mutation effcts per gene
@@ -351,11 +325,10 @@ def main():
         if debug: print(df)
 
         # FOR EACH GENE OF INTREST
-        for gene in genelist:
+        for thisgene in genelist:
             nr_of_positions = 0
             if len(gene)<=0:
                 continue
-            thisgene = dict(zip(["Chr","Start","Stop","SYMBOL"], gene.strip().split('\t')))
 
             #if debug: print(")
             vcf_records=False
