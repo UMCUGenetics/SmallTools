@@ -7,6 +7,7 @@ import numpy as np
 
 import json
 import requests
+import pickle
 
 #GENE FORMAT
 ##chr    start    stop    name
@@ -251,7 +252,7 @@ def get_geneinfo(gene, idtype):
         ext = "/lookup/id/{}?content-type=application/json".format(gene)
 
     json = generic_json_request_handler(server, ext)
-    genedef = {"Chr":json[0]['seq_region_name'], "Start":json[0]['start'], "Stop":json[0]['end'], "SYMBOL":json[0]['display_name'], "ENSEMBLID":json[0]['id']}
+    genedef = {"Chr":json['seq_region_name'], "Start":json['start'], "Stop":json['end'], "SYMBOL":json['display_name'], "ENSEMBLID":json['id']}
 
     return(genedef)
 
@@ -279,17 +280,28 @@ def main():
     for vcf_file in file_list:
         zip_and_index(vcf_file)
 
-    genecollection=[]
+
     genelist=[]
-    with open(options.genelist, 'r') as infile:
-        for line in infile:
-            genesymbol = line.strip().split('\t')[-1]
 
-            if genesymbol not in genecollection:
-                genelist.append(get_geneinfo(genesymbol, 'symbol'))
-                genecollection.append(genesymbol)
+    # We only want to run this once per genelist, faster and kinder
+    if not os.path.isfile(options.genelist+".pkl"):
+        if debug: print("GENERATING ENSEMBL GENELIST")
+        genecollection=[]
+        with open(options.genelist, 'r') as infile:
+            for line in infile:
+                genesymbol = line.strip().split('\t')[-1]
 
-    if debug: print("GENES {}".format(genecollection))
+                if genesymbol not in genecollection:
+                    genelist.append(get_geneinfo(genesymbol, 'symbol'))
+                    genecollection.append(genesymbol)
+
+        f = open(options.genelist+".pkl","wb")
+        pickle.dump(genelist,f)
+        f.close()
+    else:
+        with open(options.genelist+".pkl", 'rb') as handle:
+            genelist = pickle.load(handle)
+
     if debug: print("GENES {}".format(genelist))
 
     # DF to keep the mutation effcts per gene
