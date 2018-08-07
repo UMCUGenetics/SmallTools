@@ -289,7 +289,7 @@ def main():
         genecollection=[]
         with open(options.genelist, 'r') as infile:
             for line in infile:
-                genesymbol = line.strip().split('\t')[-1]
+                genesymbol = line.strip().split('\t')[3]
 
                 if genesymbol not in genecollection:
                     genelist.append(get_geneinfo(genesymbol, 'symbol'))
