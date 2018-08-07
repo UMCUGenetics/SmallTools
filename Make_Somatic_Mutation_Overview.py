@@ -340,7 +340,7 @@ def main():
         # FOR EACH GENE OF INTREST
         for thisgene in genelist:
             nr_of_positions = 0
-            if len(gene)<=0:
+            if len(thisgene)<=0:
                 continue
 
             #if debug: print(")
